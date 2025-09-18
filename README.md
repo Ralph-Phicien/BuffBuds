@@ -1,4 +1,4 @@
-# NAME TBD
+# BuffBuds
 
 A modern **workout logger** + **social fitness platform**.  
 Track your training, connect with friends, and push your limits together
