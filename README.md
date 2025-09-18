@@ -45,7 +45,7 @@ Track your training, connect with friends, and push your limits together
 ---
 
 ## 🛠️ Tech Stack
-- **Frontend:** React (web-first, expandable to React Native later)  
+- **Frontend:** React (web-first, mobile view first, expandable to React Native later)  
 - **Backend:** Flask (Python)  
 - **Database:** Supabase (Postgres, auth built-in)  
 - **APIs:** Exercise API (via API Ninjas)  
@@ -64,7 +64,7 @@ Track your training, connect with friends, and push your limits together
 
 ## 🧑‍💻 Team
 - [Dylan Liesenfelt] – Project Manager / Fullstack  
-    * dliesenfelt2022@fau.edu
+    * dliesenfelt2022@fau.edu or djliesenfelt@gmail.com
 - [Esteban Santome] – Frontend Engineer  
 - [Derik Colucci] – Backend Engineer  
 - [Alex Manzanares] – Backend Engineer  
