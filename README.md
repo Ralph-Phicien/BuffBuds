@@ -3,7 +3,7 @@
 A modern **workout logger** + **social fitness platform**.  
 Track your training, connect with friends, and push your limits together
 
-🌐 Live soon at: [link](https://buffbuds.netlify.app/)
+🌐 Live soon at: [buffbuds.netlify.app/](https://buffbuds.netlify.app/)
 
 ---
 
