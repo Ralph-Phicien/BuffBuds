@@ -10,4 +10,3 @@ KEY = os.getenv("API_NINJAS_KEY")
 headers = {
     'X-Api-Key': f'{KEY}'
 }
-
