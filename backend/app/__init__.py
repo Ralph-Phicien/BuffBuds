@@ -1,9 +1,8 @@
 from flask import Flask
-from .routes import api_bp
-from .auth import auth_bp
-from .routes.user import user_bp   
+from .routes.api import api_bp
+from .routes.auth import auth_bp
+from .routes.user import user_bp
 import logging
-
 
 # intializing in default config mode for testing purposes, can be changed to ProductionConfig later
 def create_app(config_object='app.config.DevelopmentConfig'):
