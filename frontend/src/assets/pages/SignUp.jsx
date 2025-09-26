@@ -1,10 +1,8 @@
 const Signup = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white]">
+    <div className="flex min-h-screen items-center justify-center bg-white">
       <form className="bg-[var(--bg)] p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h1 
-          className="text-5xl mb-6 font-[bebas] text-center"
-        >
+        <h1 className="text-5xl mb-6 font-[bebas] text-center">
           Join <span className="text-[var(--acc)]">Buff</span>
           <span className="text-[var(--hl)]">Buds</span> Today!
         </h1>
@@ -32,7 +30,7 @@ const Signup = () => {
           Sign Up
         </button>
 
-        <p className="mt-4 text-center text-gray-600">
+        <p className="mt-4 text-center text-white">
           Already have an account?{" "}
           <a href="/signin" className="text-[var(--hl)] hover:underline">
             Sign In
