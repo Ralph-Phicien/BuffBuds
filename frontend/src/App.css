@@ -1,6 +1,10 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@font-face {
+  font-family: bebas;
+  src: url("/public/fonts/BebasNeue-Regular.ttf");
+}
+
+:root {
+  --bg: #2a3439; 
+  --hl: #007BFF; 
+  --acc: rgb(238, 247, 255); 
 }
