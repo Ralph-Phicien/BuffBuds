@@ -1,7 +1,9 @@
 from flask import Flask
 from .routes import api_bp
 from .auth import auth_bp
+from .routes.user import user_bp   
 import logging
+
 
 # intializing in default config mode for testing purposes, can be changed to ProductionConfig later
 def create_app(config_object='app.config.DevelopmentConfig'):
@@ -18,6 +20,8 @@ def create_app(config_object='app.config.DevelopmentConfig'):
         # registering Blueprints
         app.register_blueprint(api_bp, url_prefix='/api')
         app.register_blueprint(auth_bp, url_prefix='/auth')
+        app.register_blueprint(user_bp)
+
 
         logger.info('APP CREATED!')
     except Exception as e:
