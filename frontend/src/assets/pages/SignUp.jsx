@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
 const Signup = () => {
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,14 +12,22 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = await apiRequest("/auth/signup", "POST", { email, password });
-    if (data.error) {
-      setError(data.error);
-    } else {
-      // Optionally: create UserProfile row here by calling /users/me
-      navigate("/signin");
+    
+    try {
+      const data = await apiRequest("/auth/signup", "POST", { email, password, username });
+
+      if (data.error) {
+        setError(data.error);
+      } else {
+        navigate("/signin");
+      }
+      
+    } catch (err) {
+      console.error("Signup request failed:", err);
+      setError("Request failed");
     }
-  };
+};
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">

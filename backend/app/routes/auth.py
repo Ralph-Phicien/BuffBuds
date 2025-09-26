@@ -6,6 +6,15 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods= ['POST'])
 def login():
 
+    """
+    User Login Route
+
+    Uses Supabase auth to sign in with email and password.
+    On successful login, stores user info in session.
+    Expects JSON payload with 'email' and 'password'.
+    Returns JSON response with success or error message.
+    """
+
     data = request.json
     email = data.get("email")
     password = data.get(("password"))
@@ -32,9 +41,19 @@ def login():
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
 
+    """
+    User Signup Route
+
+    Uses Supabase auth to create a new user with email and password.
+    On successful signup, also creates a user profile in 'user_profile' table.
+    Expects JSON payload with 'email', 'password', and 'username'.
+    Returns JSON response with success or error message.
+    """
+
     data = request.json
     email = data.get("email")
     password = data.get("password")
+    username = data.get("username")
 
     if not email or not password:
         return jsonify({"error": "Email and password required"}), 400
@@ -46,16 +65,46 @@ def signup():
         })
 
         if res.user:
+            # INSERT to user_profile table
+            supabase.table("user_profile").insert({
+                "id": res.user.id,        
+                "username": username,
+                "created_at": "now()",
+                "updated_at": "now()"
+            }).execute()
             return jsonify({"message": "User created", "user": res.user.email}), 201
+        
         return jsonify({"error": "Signup failed"}), 400
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
 
 @auth_bp.route("/logout", methods=["POST"])
 def logout():
+
+    """
+    User Logout Route
+
+    Clears user session on logout.
+    Expects no additional data.
+    Returns JSON response with success or error message.
+    """
+
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
     session.clear()
     return jsonify({"message": "Logged out"}), 200
+
+
+@auth_bp.route("/status", methods=["GET"])
+def status():
+    user = session.get("user")
+    if user:
+        return jsonify({"authenticated": True, "user": user}), 200
+    return jsonify({"authenticated": False}), 200
+
 
 """
 Authentication Routes

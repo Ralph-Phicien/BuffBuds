@@ -8,20 +8,26 @@ class Config:
     DEBUG = False
     TESTING = False
     ENV = 'production'
-    SECRET_KEY = 'password'
+
+    SECRET_KEY = os.environ.get('SECRET_KEY', '')
     
     # api keys (enviornment variables)
     SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
     SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
-    API_NINJAS_KEY = os.environ.get('API_NINJAS_KEY', '')
 
+    # Flask session cookie settings
+    SESSION_COOKIE_NAME = "session"
+    SESSION_COOKIE_HTTPONLY = True
+    
 # subclasses
 class DevelopmentConfig(Config):
     DEBUG = True
     ENV = 'development'
-    SECRET_KEY = 'password'
-
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = False  
+    
 class ProductionConfig(Config):
     DEBUG = False
     ENV = 'production'
-    SECRET_KEY = 'password'
+    SESSION_COOKIE_SAMESITE = "None"
+    SESSION_COOKIE_SECURE = True

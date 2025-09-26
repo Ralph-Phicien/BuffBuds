@@ -3,6 +3,7 @@ from .routes.api import api_bp
 from .routes.auth import auth_bp
 from .routes.user import user_bp
 import logging
+from flask_cors import CORS
 
 # intializing in default config mode for testing purposes, can be changed to ProductionConfig later
 def create_app(config_object='app.config.DevelopmentConfig'):
@@ -21,13 +22,12 @@ def create_app(config_object='app.config.DevelopmentConfig'):
         app.register_blueprint(auth_bp, url_prefix='/auth')
         app.register_blueprint(user_bp, url_prefix='/user')
 
-
         logger.info('APP CREATED!')
+
     except Exception as e:
         logger.error(f"Error creating app: {e}")
 
     return app
-
 
 """
 Logging Levels and Activation

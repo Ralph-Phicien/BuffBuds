@@ -3,18 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
 const Signin = () => {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     const data = await apiRequest("/auth/login", "POST", { email, password });
+
     if (data.error) {
       setError(data.error);
     } else {
-      navigate("/"); // redirect to feed
+      navigate("/"); 
     }
   };
 

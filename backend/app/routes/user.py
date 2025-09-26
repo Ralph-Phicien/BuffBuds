@@ -8,9 +8,14 @@ user_bp = Blueprint("user", __name__)
 # CRUD Routes
 # ----------------------
 
-# Fetch all users
 @user_bp.route("/users", methods=["GET"])
 def get_users():
+    """
+    Fetch All Users
+
+    Retrieves all user profiles from the 'user_profile' table.
+    Returns JSON response with list of users or error message.
+    """
 
     try:
         response = supabase.table("user_profile").select("*").execute()
@@ -20,9 +25,14 @@ def get_users():
         return jsonify({"error": str(e)}), 500
 
 
-# Fetch a single user by username
 @user_bp.route("/users/<string:username>", methods=["GET"])
 def get_user(username):
+    """
+    Fetch User by Username
+
+    Retrieves a user profile by username from the 'user_profile' table.
+    Returns JSON response with user data or error message.
+    """
 
     try:
         response = supabase.table("user_profile").select("*").eq("username", username).execute()
@@ -36,11 +46,17 @@ def get_user(username):
         return jsonify({"error": str(e)}), 500
 
 
-# Update user logged in user
 @user_bp.route("/users/<string:username>", methods=["PUT"])
 def update_user():
 
-    # Supabase auth handles session tokens
+    """
+    Update User Profile
+    
+    Updates the user profile for the logged-in user.
+    Expects JSON payload with fields to update.
+    Returns JSON response with updated user data or error message.
+    """
+
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     
@@ -60,14 +76,20 @@ def update_user():
         return jsonify({"error": str(e)}), 500
 
 
-# Delete user by email
 @user_bp.route("/users/<string:username>", methods=["DELETE"])
 def delete_user():
+    """
+    Delete User Account
+    Deletes the user account for the logged-in user.
+    Expects no additional data.
+    Returns JSON response with deletion status or error message.
+    """
+
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
-    
+
     try:
         response = supabase.table("UserProfile").delete().eq("id", user["id"]).execute()
         session.clear()

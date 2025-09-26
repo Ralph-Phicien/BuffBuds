@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = ""; // empty for now, porxying in vite.connfig.js
 
 export async function apiRequest(endpoint, method = "GET", body = null) {
   const options = {
@@ -8,6 +8,6 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
   };
   if (body) options.body = JSON.stringify(body);
 
-  const res = await fetch(`${API_URL}${endpoint}`, options);
+  const res = await fetch(endpoint, options);
   return res.json();
 }
