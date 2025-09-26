@@ -1,8 +1,8 @@
 import './App.css'
 import { Routes, Route } from 'react-router-dom' 
-import SignIn from './assets/pages/SignIn'
-import Signup from './assets/pages/signup'
-import Feed from './assets/pages/feed'
+import SignIn from './assets/pages/Signin'
+import Signup from './assets/pages/Signup'
+import Feed from './assets/pages/Feed'
 
 
 function App() {
