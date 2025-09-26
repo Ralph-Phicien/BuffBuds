@@ -1,14 +1,61 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request, session
+from app.supabase_client import supabase  
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/login', methods= ['GET'])
+@auth_bp.route('/login', methods= ['POST'])
 def login():
-    return jsonify({'message':'Login Successful'})
 
-@auth_bp.route('/signup', methods=['GET'])
+    data = request.json
+    email = data.get("email")
+    password = data.get(("password"))
+
+    if not email or not password:
+        return jsonify({"error":"Email and Password are required"}),400
+    
+    try: 
+        res = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
+
+        if res.user:
+            session["user"] = {"id": res.user.id, "email": res.user.email}
+            return jsonify({"message": "Login Successful", "user": res.user.email}), 200
+        
+        return jsonify({"error": "Email or Password Incorrect"}), 401
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@auth_bp.route('/signup', methods=['POST'])
 def signup():
-    return jsonify({'message':'Signup Successful'})
+
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+
+    try:
+        res = supabase.auth.sign_up({
+            "email": email,
+            "password": password
+        })
+
+        if res.user:
+            return jsonify({"message": "User created", "user": res.user.email}), 201
+        return jsonify({"error": "Signup failed"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out"}), 200
 
 """
 Authentication Routes
