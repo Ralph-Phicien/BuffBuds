@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Feed from './assets/pages/Feed'
 import SignIn from './assets/pages/SignIn'
-import SignUp from './assets/pages/signup'
+import SignUp from './assets/pages/SignUp'
 import { apiRequest } from './assets/services/api'
 
 function App() {
