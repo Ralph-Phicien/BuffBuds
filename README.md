@@ -48,14 +48,15 @@ Track your training, connect with friends, and push your limits together
 - **Frontend:** React (web-first, mobile view first, expandable to React Native later)  
 - **Backend:** Flask (Python)  
 - **Database:** Supabase (Postgres, auth built-in)  
-- **APIs:** Exercise API (via API Ninjas)  
-- **Hosting:** Netlify
+- **Hosting:** Netlify, Railway
 
 ---
 
 ## 📍 Roadmap
-- [ ] MVP workout logging + analytics  
-- [ ] Social feed + profiles  
+- [X] User management (Account sign up and login)
+- [ ] Social feed + user profiles
+- [ ] Workout logging
+- [ ] Analytical dashboard 
 - [ ] Competitions + leaderboards  
 - [ ] Gamification & achievements  
 - [ ] Mobile app (React Native)  
