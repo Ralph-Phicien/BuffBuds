@@ -1,9 +1,9 @@
 import './index.css'
 import { Routes, Route, Navigate } from 'react-router-dom' 
 import { useEffect, useState } from 'react'
-import SignIn from './assets/pages/Signin'
-import Signup from './assets/pages/Signup'
 import Feed from './assets/pages/Feed'
+import SignIn from './assets/pages/SignIn'
+import SignUp from './assets/pages/signup'
 import { apiRequest } from './assets/services/api'
 
 function App() {
@@ -32,7 +32,7 @@ function App() {
   return (
     <Routes>
       <Route path="/signin" element={<SignIn />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route path="/signup" element={<SignUp />} />
       <Route path="/" element={isAuthed ? <Feed /> : <Navigate to="/signin" replace />} />
     </Routes>
   )

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
-const Signin = () => {
+const SignIn = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,4 +67,4 @@ const Signin = () => {
   );
 };
 
-export default Signin;
+export default SignIn;

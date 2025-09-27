@@ -17,6 +17,15 @@ def create_app(config_object='app.config.DevelopmentConfig'):
         logger.info("CREATING APP...")
         app.config.from_object(config_object)
 
+        # allow Netlify frontend
+        CORS(
+            app,
+            resources={r"/*": {"origins": [
+                "https://buffbuds.netlify.app/"
+            ]}},
+            supports_credentials=True
+        )
+        
         # registering Blueprints
         app.register_blueprint(api_bp, url_prefix='/api')
         app.register_blueprint(auth_bp, url_prefix='/auth')

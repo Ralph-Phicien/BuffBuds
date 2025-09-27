@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
-const Signup = () => {
+const SignUp = () => {
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -82,4 +82,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default SignUp;

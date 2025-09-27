@@ -15,9 +15,6 @@ class Config:
     SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
     SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
 
-    # Flask session cookie settings
-    SESSION_COOKIE_NAME = "session"
-    SESSION_COOKIE_HTTPONLY = True
     
 # subclasses
 class DevelopmentConfig(Config):

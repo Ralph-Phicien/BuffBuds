@@ -1,4 +1,4 @@
-const API_URL = ""; // empty for now, porxying in vite.connfig.js
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function apiRequest(endpoint, method = "GET", body = null) {
   const options = {
