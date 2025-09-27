@@ -1,9 +1,12 @@
+// Set in netlify env not for dev, so default to empty string
 const API_BASE = import.meta.env?.VITE_API_BASE_URL || ''; 
 
+// API request function
 export async function apiRequest(path, method = 'GET', body) {
 
   const url = `${API_BASE}${path}`;
 
+  // headers and credentials for cookies
   const res = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },

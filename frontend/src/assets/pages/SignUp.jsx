@@ -19,6 +19,7 @@ const SignUp = () => {
       if (data.error) {
         setError(data.error);
       } else {
+        console.log("Signup successful");
         navigate("/signin");
       }
       

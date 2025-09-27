@@ -17,7 +17,8 @@ const SignIn = () => {
     if (data.error) {
       setError(data.error);
     } else {
-      navigate("/"); 
+      console.log("Login successful");
+      navigate("/");
     }
   };
 
