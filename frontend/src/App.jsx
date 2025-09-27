@@ -9,20 +9,26 @@ import { apiRequest } from './assets/services/api'
 function App() {
   const [loading, setLoading] = useState(true)
   const [isAuthed, setIsAuthed] = useState(false)
+  const [username, setUsername] = useState("")
 
   useEffect(() => {
 
     const checkAuth = async () => {
-      try {
-        const data = await apiRequest("/auth/status")
-        setIsAuthed(data.authenticated === true)
-      } catch (err) {
-        console.error("Auth check failed:", err)
-        setIsAuthed(false)
-      } finally {
-        setLoading(false)
+    try {
+      const data = await apiRequest("/auth/status")
+      setIsAuthed(data.authenticated === true)
+      if (data.authenticated && data.user?.username) {
+        setUsername(data.user.username)
       }
+    } catch (err) {
+      console.error("Auth check failed:", err)
+      setIsAuthed(false)
+      setUsername("")
+    } finally {
+      setLoading(false)
     }
+
+  }
 
     checkAuth()
   }, [])
