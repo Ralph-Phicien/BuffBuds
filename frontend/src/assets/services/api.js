@@ -1,9 +1,8 @@
 const API_BASE = import.meta.env?.VITE_API_BASE_URL || ''; 
 
 export async function apiRequest(path, method = 'GET', body) {
-  
+
   const url = `${API_BASE}${path}`;
-  console.log('API_BASE:', API_BASE, '→ request URL:', url);
 
   const res = await fetch(url, {
     method,
