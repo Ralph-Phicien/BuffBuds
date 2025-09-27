@@ -1,13 +1,25 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_BASE = import.meta.env?.VITE_API_BASE_URL || ''; 
 
-export async function apiRequest(endpoint, method = "GET", body = null) {
-  const options = {
+export async function apiRequest(path, method = 'GET', body) {
+  
+  const url = `${API_BASE}${path}`;
+  console.log('API_BASE:', API_BASE, '→ request URL:', url);
+
+  const res = await fetch(url, {
     method,
-    headers: { "Content-Type": "application/json" },
-    credentials: "include", 
-  };
-  if (body) options.body = JSON.stringify(body);
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-  const res = await fetch(endpoint, options);
-  return res.json();
+  const ct = res.headers.get('content-type') || '';
+  const text = await res.text();
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} ${res.statusText} — ${text.slice(0,200)}`);
+  }
+  if (!ct.includes('application/json')) {
+    throw new Error(`Expected JSON but got ${ct}. First bytes: ${text.slice(0,120)}`);
+  }
+  return JSON.parse(text);
 }
