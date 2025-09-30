@@ -17,10 +17,8 @@ function App() {
     try {
       const data = await apiRequest("/auth/status")
       setIsAuthed(data.authenticated === true)
-      console.log("Auth status:", data) 
       if (data.authenticated && data.user?.username) {
         setUsername(data.user.username)
-        console.log("Username:", data.user.username)
       }
     } catch (err) {
       console.error("Auth check failed:", err)
