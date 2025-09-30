@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
-const SignIn = () => {
+const SignIn = ({setIsAuthed, setUsername}) => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,9 +18,12 @@ const SignIn = () => {
       setError(data.error);
     } else {
       console.log("Login successful");
-      navigate("/");
+      setIsAuthed(true);                                
+      setUsername(data.user?.username || "");
+      navigate("/");                                    
     }
-  };
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
