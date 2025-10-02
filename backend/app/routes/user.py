@@ -64,7 +64,7 @@ def update_user(username):
     data = request.json
 
     try:
-        response = supabase.table("UserProfile").update({
+        response = supabase.table("user_profile").update({
             "username": data.get("username"),
             "user_bio": data.get("user_bio"),
             "updated_at": "now()"
@@ -91,7 +91,7 @@ def delete_user(username):
     user = session["user"]
 
     try:
-        response = supabase.table("UserProfile").delete().eq("id", user["id"]).execute()
+        response = supabase.table("user_profile").delete().eq("id", user["id"]).execute()
         session.clear()
 
         return jsonify({"deleted": response.count}), 200
