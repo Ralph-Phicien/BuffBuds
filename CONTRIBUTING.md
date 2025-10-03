@@ -10,7 +10,7 @@ This document explains how our team will collaborate, code, and submit changes.
 1. **Pick an issue** from GitHub Issues (or create one if needed).  
 2. **Create a feature branch** for your work.  
 3. **Code & commit** commit often, if using LLMs ensure youre code actually works, garbage in == garbage out
-4. **Open a Pull Request (PR)** into `dev`.  
+4. **Open a Pull Request (PR)** into epic branch.  
 5. Project manager reviews & approves before merging.  
 
 ---
@@ -21,7 +21,7 @@ We use a **GitHub Flow + dev branch** model:
 
 - `main` → production-ready code (stable).  
 - `dev` → active development (staging).  
-- `issue/sub-issue` → one branch per issue, branch again for sub issues.
+- `epic/issue` → one branch per issue, pull from applicable epic branch
 
 ---
 
@@ -42,13 +42,13 @@ Follow the **conventional commits** style:
 
 - **Backend (Flask)**  
   - Put routes in `backend/app/routes/` (blueprints).  
-  - Put database/API logic in `backend/app/services/`.  
-  - Don’t hardcode secrets — always use `.env`.  
+  - Put informational .JSON in `backend/data`.  
+  - Don’t hardcode secrets — always use `.env` into root (./)  
 
 - **Frontend (React)**  
-  - Pages go in `frontend/src/pages/`.  
-  - Reusable UI goes in `frontend/src/components/`.  
-  - All API calls go in `frontend/src/services/api.js`.  
+  - Pages go in `frontend/src/assets/pages/`.  
+  - Reusable UI goes in `frontend/src/assets/components/`.  
+  - API calls go in `frontend/src/services/api.js`.  
 
 ---
 
@@ -56,13 +56,13 @@ Follow the **conventional commits** style:
 
 1. Ensure your code works properly and issue requirments are met.  
 1. Push your branch.  
-2. Open a PR into `dev`.  
-4. Once approved, project manager will merge → `dev`.  
-5. Porject manager (Dylan) will merge  `dev` → `main` after testing and sprint goals met.  
-
+2. Open a PR into applicable `#####-epic` branch.  
+4. Once approved, project manager will merge → `#####-epic`.  
+5. Project manager (Dylan) will merge  `#####-epic` → `dev` after testing and sprint goals met.
+6. at end of testing of `dev`→ `main`, dev satys deployed during duration of development, main goes live after all deveolpment goals and testing is complete.
 ---
 
-## 📦 Setup Instructions
+## 📦 Setup Instructions (Devlopement)
 
 ### Backend (Flask)
 
@@ -72,8 +72,11 @@ Follow the **conventional commits** style:
     - format:
         - SUPABASE_URL= "url here"
         - SUPABASE_KEY= "key here"
-        - API_NINJAS_KEY= "key here"
-4. `python wsgi.py` → runs server on local
+        - SECERT_KEY= "key here"
+     
+4. ensure in wsgi.py that line 4 `app = create_app('app.config.DevelopmentConfig')
+` app.config should always use class DevelopmentConfig in dev
+5. `python wsgi.py` → runs server on local
 
 ### Frontend (React)
 
@@ -87,6 +90,6 @@ Follow the **conventional commits** style:
 
 - All tasks must be linked to a GitHub Issue.  
 - Tag issues with `frontend`, `backend`, `bug`, or `enhancement`.  
-- Assign yourself when working on an issue.  
+- Announce yourself in work on the "in-work" channel on discord with the issue you are going in work on 
 
 ---
