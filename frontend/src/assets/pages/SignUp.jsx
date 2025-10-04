@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiRequest } from "../services/api";
+import { signup } from "../services/api";
 
-const SignUp = () => {
-
-  const [username, setUsername] = useState("");
+const SignUp = ({ setIsAuthed, setUsername }) => {
+  const [usernameInput, setUsernameInput] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -12,23 +11,31 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setError(null);
+
     try {
-      const data = await apiRequest("/auth/signup", "POST", { email, password, username });
+      const res = await signup({
+        email,
+        password,
+        username: usernameInput,
+      });
 
-      if (data.error) {
-        setError(data.error);
+      if (res.status === 201) {
+        setIsAuthed(true);
+        setUsername(usernameInput);
+
+        // persist in localStorage
+        localStorage.setItem("user", JSON.stringify({ username: usernameInput }));
+
+        navigate("/");
       } else {
-        console.log("Signup successful");
-        navigate("/signin");
+        setError(res.data?.error || "Signup failed. Try again.");
       }
-      
     } catch (err) {
-      console.error("Signup request failed:", err);
-      setError("Request failed");
+      console.error("Signup error:", err);
+      setError(err.response?.data?.error || "Signup failed. Try again.");
     }
-};
-
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
@@ -44,8 +51,8 @@ const SignUp = () => {
         <input
           type="text"
           placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={usernameInput}
+          onChange={(e) => setUsernameInput(e.target.value)}
           className="w-full p-3 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--hl)] bg-gray-100"
         />
         <input

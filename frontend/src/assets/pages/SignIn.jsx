@@ -1,29 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiRequest } from "../services/api";
+import { login } from "../services/api";
 
-const SignIn = ({setIsAuthed, setUsername}) => {
-
+const SignIn = ({ setIsAuthed, setUsername }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
-    const data = await apiRequest("/auth/login", "POST", { email, password });
+    setError(null);
 
-    if (data.error) {
-      setError(data.error);
-    } else {
-      console.log("Login successful");
-      setIsAuthed(true);                                
-      setUsername(data.user?.username || "");
-      navigate("/");                                    
+    try {
+      const res = await login({ email, password });
+
+      if (res.status === 200) {
+        setIsAuthed(true);
+        setUsername(res.data.user?.username || "");
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ username: res.data.user?.username })
+        );
+
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.error || "Login failed. Try again.");
     }
-  }
-
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
