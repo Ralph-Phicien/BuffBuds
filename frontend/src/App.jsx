@@ -68,7 +68,11 @@ function App() {
         path="/"
         element={
           isAuthed ? (
-            <Feed username={username} />
+            <Feed 
+              username={username}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
           ) : (
             <Navigate to="/signin" replace />
           )
