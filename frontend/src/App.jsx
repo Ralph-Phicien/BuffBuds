@@ -5,6 +5,7 @@ import Feed from './assets/pages/Feed'
 import SignIn from './assets/pages/SignIn'
 import SignUp from './assets/pages/SignUp'
 import { apiRequest } from './assets/services/api'
+import ProfilePage from './assets/pages/ProfilePage.jsx'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -40,6 +41,7 @@ function App() {
       <Route path="/signin" element={<SignIn setIsAuthed={setIsAuthed} setUsername={setUsername} />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/" element={isAuthed ? <Feed /> : <Navigate to="/signin" replace />} />
+      <Route path="/profilepage-dev" element={<ProfilePage />} />
     </Routes>
   )
 }
