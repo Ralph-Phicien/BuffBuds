@@ -1,27 +1,30 @@
-// Set in netlify env not for dev, so default to empty string
-const API_BASE = import.meta.env?.VITE_API_BASE_URL || ''; 
+import axios from "axios";
 
-// API request function
-export async function apiRequest(path, method = 'GET', body) {
+const API_BASE = import.meta.env?.VITE_API_BASE_URL || "http://localhost:5000";
 
-  const url = `${API_BASE}${path}`;
+const API = axios.create({
+  baseURL: API_BASE,
+  withCredentials: true,
+});
 
-  // headers and credentials for cookies
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: body ? JSON.stringify(body) : undefined,
-  });
+/* AUTH */
+export const login = (data) => API.post("/auth/login", data);
+export const signup = (data) => API.post("/auth/signup", data);
+export const logout = () => API.post("/auth/logout");
+export const checkStatus = () => API.get("/auth/status");
 
-  const ct = res.headers.get('content-type') || '';
-  const text = await res.text();
+/* POSTS */
+export const createPost = (data) => API.post("/posts", data);
+export const getPosts = () => API.get("/posts");
+export const getPost = (id) => API.get(`/posts/${id}`);
+export const likePost = (id) => API.post(`/posts/${id}/like`);
+export const commentOnPost = (id, data) => API.post(`/posts/${id}/comment`, data);
+export const updatePost = (id, data) => API.put(`/posts/${id}`, data);
+export const deletePost = (id) => API.delete(`/posts/${id}`);
+export const getUserPosts = (username) => API.get(`/posts/user/${username}`);
 
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} ${res.statusText} — ${text.slice(0,200)}`);
-  }
-  if (!ct.includes('application/json')) {
-    throw new Error(`Expected JSON but got ${ct}. First bytes: ${text.slice(0,120)}`);
-  }
-  return JSON.parse(text);
-}
+/* USERS */
+export const getUsers = () => API.get("/user/users");
+export const getUser = (username) => API.get(`/user/users/${username}`);
+export const updateUser = (username, data) => API.put(`/user/users/${username}`, data);
+export const deleteUser = (username) => API.delete(`/user/users/${username}`);

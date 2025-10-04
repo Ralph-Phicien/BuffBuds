@@ -28,7 +28,8 @@ def create_post():
         "content": data.get("content"),
         "like_count": 0,
         "comments": [],
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now(datetime.timezone.utc).isoformat(),
+        "title": data.get("title")
     }
 
     response = supabase.table("Posts").insert(post).execute()
@@ -44,7 +45,7 @@ def get_posts():
     Fetch all posts.
     """
     response = supabase.table("Posts").select(
-        "id, content, like_count, comments, created_at, user_profile(username, user_bio)"   
+        "id, content, like_count, comments, created_at, title, user_profile(username, user_bio)"   
     ).execute()
     return jsonify(response.data), 200
 
@@ -55,7 +56,7 @@ def get_post(post_id):
     Fetch a single post by ID.
     """
     response = supabase.table("Posts").select(
-        "id, content, like_count, comments, created_at, user_profile(username, user_bio)"   
+        "id, content, like_count, comments, created_at, title, user_profile(username, user_bio)"   
     ).eq("id", post_id).execute()
     if not response.data:
         return jsonify({"error": "Post not found"}), 404
@@ -99,7 +100,7 @@ def add_comment(post_id):
     comment = {
         "username": user["username"],
         "text": data.get("text"),
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now(datetime.timezone.utc).isoformat()
     }
 
     # Fetch existing comments
@@ -172,3 +173,21 @@ def delete_post(post_id):
 
     supabase.table("Posts").delete().eq("id", post_id).execute()
     return jsonify({"message": "Post deleted successfully"}), 200
+
+# ----------------------------
+# GET POSTS FOR A USER
+# ----------------------------
+@posts_bp.route("/posts/user/<username>", methods=["GET"])
+def get_user_posts(username):
+    """
+    Fetch all posts created by a given user.
+    Joins against user_profile to filter by username.
+    """
+    response = supabase.table("Posts").select(
+        "id, content, like_count, comments, created_at, title, user_profile(username, user_bio)"
+    ).eq("user_profile.username", username).execute()
+
+    if not response.data:
+        return jsonify([]), 200 
+
+    return jsonify(response.data), 200
