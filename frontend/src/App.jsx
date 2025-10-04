@@ -54,6 +54,16 @@ function App() {
   return (
     <Routes>
       <Route
+        path="/profile/:username"
+        element={
+          isAuthed ? (
+            <ProfilePage username={username} setIsAuthed={setIsAuthed} setUsername={setUsername} />
+          ) : (
+            <Navigate to="/signin" replace />
+          )
+        }
+      />
+      <Route
         path="/signin"
         element={
           <SignIn setIsAuthed={setIsAuthed} setUsername={setUsername} />

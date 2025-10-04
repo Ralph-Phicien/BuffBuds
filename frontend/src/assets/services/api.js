@@ -14,13 +14,14 @@ export const logout = () => API.post("/auth/logout");
 export const checkStatus = () => API.get("/auth/status");
 
 /* POSTS */
-export const createPost = (data) => API.post("/api/posts", data);
-export const getPosts = () => API.get("/api/posts");
-export const getPost = (id) => API.get(`/api/posts/${id}`);
-export const likePost = (id) => API.post(`/api/posts/${id}/like`);
-export const commentOnPost = (id, data) => API.post(`/api/posts/${id}/comment`, data);
-export const updatePost = (id, data) => API.put(`/api/posts/${id}`, data);
-export const deletePost = (id) => API.delete(`/api/posts/${id}`);
+export const createPost = (data) => API.post("/posts", data);
+export const getPosts = () => API.get("/posts");
+export const getPost = (id) => API.get(`/posts/${id}`);
+export const likePost = (id) => API.post(`/posts/${id}/like`);
+export const commentOnPost = (id, data) => API.post(`/posts/${id}/comment`, data);
+export const updatePost = (id, data) => API.put(`/posts/${id}`, data);
+export const deletePost = (id) => API.delete(`/posts/${id}`);
+export const getUserPosts = (username) => API.get(`/posts/user/${username}`);
 
 /* USERS */
 export const getUsers = () => API.get("/user/users");

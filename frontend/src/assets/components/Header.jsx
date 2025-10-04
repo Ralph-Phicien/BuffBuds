@@ -33,9 +33,8 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
           <Link className="hover:text-[var(--hl)] transition" to="/">Feed</Link>
           <Link className="hover:text-[var(--hl)] transition" to="/workout">Workout</Link>
           <Link className="hover:text-[var(--hl)] transition" to="/analytics">Analytics</Link>
-          <Link className="hover:text-[var(--hl)] transition" to={`/profile/${username}`}>
-            {username ? `${username}'s Profile` : "Profile"}
-          </Link>
+          <Link className="hover:text-[var(--hl)] transition" to={`/profile/${username}`}>Profile</Link>
+          
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition"
@@ -59,9 +58,7 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
           <Link to="/" onClick={() => setMenuOpen(false)}>Feed</Link>
           <Link to="/workout" onClick={() => setMenuOpen(false)}>Workout</Link>
           <Link to="/analytics" onClick={() => setMenuOpen(false)}>Analytics</Link>
-          <Link to={`/profile/${username}`} onClick={() => setMenuOpen(false)}>
-            {username ? `${username}'s Profile` : "Profile"}
-          </Link>
+          <Link to={`/profile/${username}`} onClick={() => setMenuOpen(false)}>Profile</Link>
           <button
             className="bg-red-500 text-white px-3 py-2 rounded w-fit"
             onClick={() => {

@@ -1,79 +1,89 @@
 import React, { useState, useEffect } from "react";
+import Header from "../components/Header";
+import { getUser, getUserPosts } from "../services/api";
 
-const ProfilePage = () => {
-    const [user, setUser] = useState(null);
-    const [posts, setPosts] = useState([]);
+const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
+  const [user, setUser] = useState({
+    bio: "Loading bio...",
+    profilePicture: "/logo.png",
+  });
+  const [posts, setPosts] = useState([]);
 
-    const fetchUserData = () => {
-        return Promise.resolve({
-            username: "johndoe123",
-            name:"John Doe",
-            bio: "Lifting is Life",
-            age: 27,
-            profilePicture: "/defaultpfp.jpeg",
-
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await getUser(username);
+        setUser({
+          bio: res.data.bio || "No bio yet",
+          profilePicture:
+            res.data.profilePicture || "/logo.png",
         });
-    };
-    const fetchUserPosts = () => {
-    const posts = Array.from({ length: 10 }, (_, i) => ({
-        id: i,
-        title: `Placeholder caption/title`,
-        image: "/defaultpost.jpeg",
-    }));
-
-    return Promise.resolve(posts);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
     };
 
+    const fetchUserPosts = async () => {
+      try {
+        const res = await getUserPosts(username);
+        setPosts(res.data || []);
+      } catch (error) {
+        console.error("Error fetching user posts:", error);
+      }
+    };
 
-    useEffect(() => {
-        const loadData = async () => {
-            const userData = await fetchUserData();
-            const userPosts = await fetchUserPosts();
-            setUser(userData);
-            setPosts(userPosts);
-        };
-        loadData();
-    }, []);
-
-    if (!user) return <div>Loading profile...</div>
+    if (username) {
+      fetchUserData();
+      fetchUserPosts();
+    }
+  }, [username]);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      {/* Header */}
-      <div className="flex items-center space-x-4 mb-6">
-        <img
-          src={user.profilePicture}
-          alt="Profile"
-          className="w-24 h-24 rounded-full object-cover border"
-        />
-        <div>
-          <h1 className="text-2xl font-bold">{user.username}</h1>
-          <p className="text-gray-600">{user.bio}</p>
+    <>
+      <Header
+        username={username}
+        setIsAuthed={setIsAuthed}
+        setUsername={setUsername}
+      />
+      <div className="max-w-3xl mx-auto p-6">
+        {/* Bio */}
+        <div className="flex items-center space-x-4 mb-6">
+          <img
+            src={user.profilePicture}
+            alt="Profile Picture"
+            className="w-24 h-24 rounded-2xl object-cover shadow-lg"
+          />
+          <div>
+            <h1 className="text-2xl font-bold">{username}</h1>
+            <p className="text-gray-600">{user.bio}</p>
+          </div>
+        </div>
+
+        {/* Posts */}
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {posts.map((post) => (
+              <div key={post.id} className="rounded-lg overflow-hidden shadow">
+                <img
+                  src={post.image}
+                  alt={post.title}
+                  className="w-full h-40 object-cover"
+                />
+                <p className="p-2 text-center text-sm">{post.title}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No posts yet.</p>
+        )}
+
+        {/* Footer */}
+        <div className="p-4 bg-blue-500 text-white rounded-lg text-center">
+          <p>PR / Stats placeholder</p>
         </div>
       </div>
-
-      
-      {/* Posts */}
-      <h2 className="text-xl font-semibold mb-4">Posts</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {posts.map((post) => (
-          <div key={post.id} className="rounded-lg overflow-hidden shadow">
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full h-40 object-cover"
-            />
-            <p className="p-2 text-center text-sm">{post.title}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="p-4 bg-blue-500 text-white rounded-lg text-center">
-        <p>PR / Stats placeholder</p>
-      </div>
-    </div>
+    </>
   );
 };
 
-export default ProfilePage
+export default ProfilePage;
