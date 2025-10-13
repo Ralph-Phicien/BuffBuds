@@ -12,6 +12,8 @@ const Feed = ({ username, setIsAuthed, setUsername }) => {
       try {
         const res = await getPosts();
         // Flatten nested Supabase join (user_profile.username, etc.)
+        console.log("getPosts response:", res.data);
+
         const formatted = (res.data || []).map((p) => ({
           ...p,
           username: p.user_profile?.username || "Unknown",
