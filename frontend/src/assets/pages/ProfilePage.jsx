@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
+import Post from "../components/Post";
 import { getUser, getUserPosts } from "../services/api";
 
 const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
@@ -8,6 +9,7 @@ const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
     profilePicture: "/logo.png",
   });
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -15,8 +17,7 @@ const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
         const res = await getUser(username);
         setUser({
           bio: res.data.bio || "No bio yet",
-          profilePicture:
-            res.data.profilePicture || "/logo.png",
+          profilePicture: res.data.profilePicture || "/logo.png",
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -26,9 +27,13 @@ const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
     const fetchUserPosts = async () => {
       try {
         const res = await getUserPosts(username);
-        setPosts(res.data || []);
+        const data = Array.isArray(res.data) ? res.data : [];
+        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        setPosts(data);
       } catch (error) {
         console.error("Error fetching user posts:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -39,50 +44,47 @@ const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
   }, [username]);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Header */}
       <Header
         username={username}
         setIsAuthed={setIsAuthed}
         setUsername={setUsername}
       />
-      <div className="max-w-3xl mx-auto p-6">
-        {/* Bio */}
-        <div className="flex items-center space-x-4 mb-6">
+
+      {/* Profile Section */}
+      <section className="max-w-3xl mx-auto p-6">
+        <div className="flex justify-evenly items-center gap-18">
           <img
             src={user.profilePicture}
-            alt="Profile Picture"
+            alt="Profile"
             className="w-24 h-24 rounded-2xl object-cover shadow-lg"
           />
           <div>
-            <h1 className="text-2xl font-bold">{username}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">@{username}</h1>
             <p className="text-gray-600">{user.bio}</p>
           </div>
         </div>
+      </section>
 
-        {/* Posts */}
-        {posts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {posts.map((post) => (
-              <div key={post.id} className="rounded-lg overflow-hidden shadow">
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-40 object-cover"
-                />
-                <p className="p-2 text-center text-sm">{post.title}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500">No posts yet.</p>
-        )}
-
-        {/* Footer */}
-        <div className="p-4 bg-blue-500 text-white rounded-lg text-center">
-          <p>PR / Stats placeholder</p>
+      {/* Scrollable Posts */}
+      <main className="flex-1 overflow-y-auto px-6 pb-6 flex flex-col items-center">
+        <div className="w-full max-w-2xl">
+          {loading ? (
+            <p className="text-gray-500 text-center">Loading posts...</p>
+          ) : posts.length === 0 ? (
+            <p className="text-gray-500 text-center">No posts yet.</p>
+          ) : (
+            posts.map((post) => <Post key={post.id} post={post} />)
+          )}
         </div>
-      </div>
-    </>
+      </main>
+
+      {/* Footer */}
+      <footer className="p-4 bg-blue-500 text-white text-center">
+        <p>PR / Stats placeholder</p>
+      </footer>
+    </div>
   );
 };
 
