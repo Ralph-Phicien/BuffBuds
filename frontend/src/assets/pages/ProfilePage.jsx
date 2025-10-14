@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Post from "../components/Post";
 import { getUser, getUserPosts } from "../services/api";
 
-const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
+const ProfilePage = ({ username, userId, setIsAuthed, setUsername }) => {
   const [user, setUser] = useState({
     bio: "Loading bio...",
     profilePicture: "/logo.png",
@@ -75,7 +75,7 @@ const ProfilePage = ({ username, setIsAuthed, setUsername }) => {
           ) : posts.length === 0 ? (
             <p className="text-gray-500 text-center">No posts yet.</p>
           ) : (
-            posts.map((post) => <Post key={post.id} post={post} />)
+            posts.map((post) => <Post key={post.id} post={post} currentUser={userId}/>)
           )}
         </div>
       </main>

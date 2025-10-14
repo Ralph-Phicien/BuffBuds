@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Post from "../components/Post";
 import { getPosts } from "../services/api";
 
-const Feed = ({ username, setIsAuthed, setUsername }) => {
+const Feed = ({ username, userId, setIsAuthed, setUsername }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,7 +51,7 @@ const Feed = ({ username, setIsAuthed, setUsername }) => {
         ) : posts.length === 0 ? (
           <p className="text-gray-500">No posts yet. Be the first to post!</p>
         ) : (
-          posts.map((post) => <Post key={post.id} post={post} />)
+          posts.map((post) => <Post key={post.id} post={post} currentUser={userId} />)
         )}
       </main>
     </div>
