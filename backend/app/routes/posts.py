@@ -9,7 +9,7 @@ posts_bp = Blueprint("posts", __name__)
 # ----------------------------
 # CREATE POST
 # ----------------------------
-@posts_bp.route("/posts", methods=["POST"])
+@posts_bp.route("/", methods=["POST"])
 def create_post():
     """
     Create a new post.
@@ -28,7 +28,8 @@ def create_post():
         "content": data.get("content"),
         "like_count": 0,
         "comments": [],
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now(datetime.timezone.utc).isoformat(),
+        "title": data.get("title")
     }
 
     response = supabase.table("Posts").insert(post).execute()
@@ -38,24 +39,24 @@ def create_post():
 # ----------------------------
 # READ POSTS
 # ----------------------------
-@posts_bp.route("/posts", methods=["GET"])
+@posts_bp.route("/", methods=["GET"])
 def get_posts():
     """
     Fetch all posts.
     """
     response = supabase.table("Posts").select(
-        "id, content, like_count, comments, created_at, user_profile(username, user_bio)"   
+        "id, content, like_count, comments, created_at, title, liked_by, user_profile!Posts_user_id_fkey(username)"   
     ).execute()
     return jsonify(response.data), 200
 
 
-@posts_bp.route("/posts/<post_id>", methods=["GET"])
+@posts_bp.route("/<post_id>", methods=["GET"])
 def get_post(post_id):
     """
     Fetch a single post by ID.
     """
     response = supabase.table("Posts").select(
-        "id, content, like_count, comments, created_at, user_profile(username, user_bio)"   
+        "id, content, like_count, comments, created_at, title, liked_by, user_profile!Posts_user_id_fkey(username)"   
     ).eq("id", post_id).execute()
     if not response.data:
         return jsonify({"error": "Post not found"}), 404
@@ -65,25 +66,69 @@ def get_post(post_id):
 # ----------------------------
 # LIKE A POST
 # ----------------------------
-@posts_bp.route("/posts/<post_id>/like", methods=["POST"])
+@posts_bp.route("/<post_id>/like", methods=["POST"])
 def like_post(post_id):
     """
-    Increment like_count for a post.
-    - No user restriction, anyone can like.
+    Adds the current user's ID to liked_by and increments like_count.
     """
-    post = supabase.table("Posts").select("like_count").eq("id", post_id).single().execute()
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session["user"]["id"]
+
+    post = supabase.table("Posts").select("like_count, liked_by").eq("id", post_id).single().execute()
     if not post.data:
         return jsonify({"error": "Post not found"}), 404
 
-    new_count = post.data["like_count"] + 1
-    response = supabase.table("Posts").update({"like_count": new_count}).eq("id", post_id).execute()
-    return jsonify(response.data[0]), 200
+    liked_by = post.data.get("liked_by") or []
+    like_count = post.data.get("like_count") or 0
 
+    if user_id not in liked_by:
+        liked_by.append(user_id)
+        like_count += 1
+
+        supabase.table("Posts").update({
+            "like_count": like_count,
+            "liked_by": liked_by
+        }).eq("id", post_id).execute()
+
+    return jsonify({"like_count": like_count, "liked_by": liked_by}), 200
+
+# ----------------------------
+# UNLIKE A POST
+# ----------------------------
+@posts_bp.route("/<post_id>/unlike", methods=["PUT"])
+def unlike_post(post_id):
+    """
+    Removes the current user's ID from liked_by and decrements like_count.
+    """
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session["user"]["id"]
+
+    post = supabase.table("Posts").select("like_count, liked_by").eq("id", post_id).single().execute()
+    if not post.data:
+        return jsonify({"error": "Post not found"}), 404
+
+    liked_by = post.data.get("liked_by") or []
+    like_count = post.data.get("like_count") or 0
+
+    if user_id in liked_by:
+        liked_by.remove(user_id)
+        like_count = max(0, like_count - 1)
+
+        supabase.table("Posts").update({
+            "like_count": like_count,
+            "liked_by": liked_by
+        }).eq("id", post_id).execute()
+
+    return jsonify({"like_count": like_count, "liked_by": liked_by}), 200
 
 # ----------------------------
 # ADD COMMENT
 # ----------------------------
-@posts_bp.route("/posts/<post_id>/comment", methods=["POST"])
+@posts_bp.route("/<post_id>/comment", methods=["POST"])
 def add_comment(post_id):
     """
     Add a comment to a post.
@@ -99,7 +144,7 @@ def add_comment(post_id):
     comment = {
         "username": user["username"],
         "text": data.get("text"),
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now(datetime.timezone.utc).isoformat()
     }
 
     # Fetch existing comments
@@ -117,7 +162,7 @@ def add_comment(post_id):
 # ----------------------------
 # UPDATE (EDIT) POST
 # ----------------------------
-@posts_bp.route("/posts/<post_id>", methods=["PUT"])
+@posts_bp.route("/<post_id>", methods=["PUT"])
 def update_post(post_id):
     """
     Edit a post's content.
@@ -150,7 +195,7 @@ def update_post(post_id):
 # ----------------------------
 # DELETE POST
 # ----------------------------
-@posts_bp.route("/posts/<post_id>", methods=["DELETE"])
+@posts_bp.route("/<post_id>", methods=["DELETE"])
 def delete_post(post_id):
     """
     Delete a post.
@@ -172,3 +217,21 @@ def delete_post(post_id):
 
     supabase.table("Posts").delete().eq("id", post_id).execute()
     return jsonify({"message": "Post deleted successfully"}), 200
+
+# ----------------------------
+# GET POSTS FOR A USER
+# ----------------------------
+@posts_bp.route("/user/<username>", methods=["GET"])
+def get_user_posts(username):
+    """
+    Fetch all posts created by a given user.
+    Joins against user_profile to filter by username.
+    """
+    response = supabase.table("Posts").select(
+        "id, content, like_count, comments, created_at, title, user_profile!Posts_user_id_fkey(username)"
+    ).eq("user_profile.username", username).execute()
+
+    if not response.data:
+        return jsonify([]), 200 
+
+    return jsonify(response.data), 200
