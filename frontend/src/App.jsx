@@ -11,15 +11,19 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState(false);
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
+
 
   // Hydrate from localStorage immediately
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const { username } = JSON.parse(storedUser);
-      setIsAuthed(true);
-      setUsername(username || "");
-    }
+  if (storedUser) {
+    const { username, id } = JSON.parse(storedUser);
+    setIsAuthed(true);
+    setUsername(username || "");
+    setUserId(id || "");
+  }
+
     setLoading(false);
 
     // Background check with backend
@@ -29,19 +33,25 @@ function App() {
         if (res.data.authenticated) {
           setIsAuthed(true);
           setUsername(res.data.user?.username || "");
+          setUserId(res.data.user?.id || "");
           localStorage.setItem(
             "user",
-            JSON.stringify({ username: res.data.user?.username })
+            JSON.stringify({
+              username: res.data.user?.username,
+              id: res.data.user?.id,
+            })
           );
         } else {
           setIsAuthed(false);
           setUsername("");
+          setUserId("");
           localStorage.removeItem("user");
         }
       } catch (err) {
         console.error("Auth check failed:", err);
         setIsAuthed(false);
         setUsername("");
+        setUserId("");
         localStorage.removeItem("user");
       }
     };
@@ -57,7 +67,7 @@ function App() {
         path="/profile/:username"
         element={
           isAuthed ? (
-            <ProfilePage username={username} setIsAuthed={setIsAuthed} setUsername={setUsername} />
+            <ProfilePage username={username} userId={userId} setIsAuthed={setIsAuthed} setUsername={setUsername} />
           ) : (
             <Navigate to="/signin" replace />
           )
@@ -81,6 +91,7 @@ function App() {
           isAuthed ? (
             <Feed 
               username={username}
+              userId={userId}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}
             />
