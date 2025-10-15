@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { signup } from "../services/api";
 
 const SignUp = ({ setIsAuthed, setUsername }) => {
@@ -81,9 +81,9 @@ const SignUp = ({ setIsAuthed, setUsername }) => {
 
         <p className="mt-4 text-center text-white">
           Already have an account?{" "}
-          <a href="/signin" className="text-[var(--hl)] hover:underline">
+          <Link to="/signin" className="text-[var(--hl)] hover:underline">
             Sign In
-          </a>
+          </Link>
         </p>
       </form>
     </div>
