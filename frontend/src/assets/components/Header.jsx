@@ -83,7 +83,7 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
             <span className="text-[var(--hl)]">BUDS</span>
           </h1>
 
-          {/* Search (hidden on mobile) */}
+          {/* Search*/}
           <div className="relative flex-1 max-w-md hidden sm:block" ref={searchWrapRef}>
             <input
               value={search}
@@ -104,7 +104,7 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
                   suggestions.map((u) => (
                     <li
                       key={u.id || u.username}
-                      onClick={() => handleSelectUser(u.username)}
+                      onMouseDown={() => handleSelectUser(u.username)}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-800"
                     >
                       @{u.username}
