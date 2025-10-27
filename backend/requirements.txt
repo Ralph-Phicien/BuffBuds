@@ -5,3 +5,4 @@ requests
 app
 gunicorn
 flask-cors
+flask_session

@@ -6,6 +6,8 @@ from .routes.posts import posts_bp
 from .routes.workout import workouts_bp
 import logging
 from flask_cors import CORS
+from flask_session import Session
+
 
 
 # intializing in default config mode for testing purposes, can be changed to ProductionConfig later
@@ -32,7 +34,13 @@ def create_app(config_object='app.config.DevelopmentConfig'):
             supports_credentials=True
         )
 
-        
+
+        app.config["SESSION_TYPE"] = "filesystem"  # persists between restarts
+        app.config["SESSION_PERMANENT"] = True
+        app.config["SESSION_USE_SIGNER"] = True
+        app.config["SESSION_COOKIE_HTTPONLY"] = True
+        Session(app)
+
         # registering Blueprints
         app.register_blueprint(api_bp, url_prefix='/api')
         app.register_blueprint(auth_bp, url_prefix='/auth')
