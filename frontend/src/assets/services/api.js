@@ -9,6 +9,9 @@ export const API = axios.create({
   withCredentials: true,
 });
 
+console.log(import.meta.env.VITE_API_BASE);
+
+
 /* AUTH */
 export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
