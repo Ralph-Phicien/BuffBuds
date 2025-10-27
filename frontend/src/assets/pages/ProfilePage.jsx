@@ -29,9 +29,13 @@ const ProfilePage = ({ userId, setIsAuthed, setUsername }) => {
     const fetchUserPosts = async () => {
       try {
         const res = await getUserPosts(username);
-        const data = Array.isArray(res.data) ? res.data : [];
-        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        setPosts(data);
+        const raw = Array.isArray(res.data) ? res.data : [];
+        const formatted = raw.map((p) => ({
+          ...p,
+          username: p.user_profile?.username || username, // ✅ flatten the join
+        }));
+        formatted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        setPosts(formatted);
       } catch (error) {
         console.error("Error fetching user posts:", error);
       } finally {
