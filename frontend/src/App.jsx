@@ -5,6 +5,7 @@ import Feed from './assets/pages/Feed'
 import SignIn from './assets/pages/SignIn'
 import SignUp from './assets/pages/SignUp'
 import ProfilePage from './assets/pages/ProfilePage.jsx'
+import Workout from './assets/pages/Workout'
 import { checkStatus } from "./assets/services/api";
 
 function App() {
@@ -90,6 +91,21 @@ function App() {
         element={
           isAuthed ? (
             <Feed 
+              username={username}
+              userId={userId}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
+          ) : (
+            <Navigate to="/signin" replace />
+          )
+        }
+      />
+      <Route
+        path="/workout"
+        element={
+          isAuthed ? (
+            <Workout
               username={username}
               userId={userId}
               setIsAuthed={setIsAuthed}
