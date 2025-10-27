@@ -1,13 +1,16 @@
 import axios from "axios";
 
 const API_BASE =
-  import.meta.env.VITE_API_BASE ||
+  import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? "http://localhost:5000" : "https://buffbuds-production.up.railway.app");
 
 export const API = axios.create({
   baseURL: API_BASE,
   withCredentials: true,
 });
+
+console.log(import.meta.env.VITE_API_BASE);
+
 
 /* AUTH */
 export const login = (data) => API.post("/auth/login", data);

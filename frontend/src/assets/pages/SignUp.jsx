@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { signup } from "../services/api";
 
 const SignUp = ({ setIsAuthed, setUsername }) => {
@@ -21,13 +21,8 @@ const SignUp = ({ setIsAuthed, setUsername }) => {
       });
 
       if (res.status === 201) {
-        setIsAuthed(true);
-        setUsername(usernameInput);
-
-        // persist in localStorage
-        localStorage.setItem("user", JSON.stringify({ username: usernameInput }));
-
-        navigate("/");
+        alert("Signup successful! Please check your email to verify your account.");
+        navigate("/signin");
       } else {
         setError(res.data?.error || "Signup failed. Try again.");
       }
@@ -81,9 +76,9 @@ const SignUp = ({ setIsAuthed, setUsername }) => {
 
         <p className="mt-4 text-center text-white">
           Already have an account?{" "}
-          <a href="/signin" className="text-[var(--hl)] hover:underline">
+          <Link to="/signin" className="text-[var(--hl)] hover:underline">
             Sign In
-          </a>
+          </Link>
         </p>
       </form>
     </div>

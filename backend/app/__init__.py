@@ -3,9 +3,11 @@ from .routes.api import api_bp
 from .routes.auth import auth_bp
 from .routes.user import user_bp
 from .routes.posts import posts_bp
-from .routes.workout_plans import workout_plans_bp
+from .routes.workout import workouts_bp
 import logging
 from flask_cors import CORS
+from flask_session import Session
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 # intializing in default config mode for testing purposes, can be changed to ProductionConfig later
@@ -32,13 +34,22 @@ def create_app(config_object='app.config.DevelopmentConfig'):
             supports_credentials=True
         )
 
-        
+
+        app.config["SESSION_TYPE"] = "filesystem"  # persists between restarts
+        app.config["SESSION_PERMANENT"] = True
+        app.config["SESSION_USE_SIGNER"] = True
+        app.config["SESSION_COOKIE_HTTPONLY"] = True
+        Session(app)
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+
         # registering Blueprints
         app.register_blueprint(api_bp, url_prefix='/api')
         app.register_blueprint(auth_bp, url_prefix='/auth')
         app.register_blueprint(user_bp, url_prefix='/user')
         app.register_blueprint(posts_bp, url_prefix='/posts')
-        app.register_blueprint(workout_plans_bp, url_prefix='/workout-plans')
+        app.register_blueprint(workouts_bp, url_prefix='/workout')
+
 
         logger.info('APP CREATED!')
 
