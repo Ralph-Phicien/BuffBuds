@@ -21,13 +21,8 @@ const SignUp = ({ setIsAuthed, setUsername }) => {
       });
 
       if (res.status === 201) {
-        setIsAuthed(true);
-        setUsername(usernameInput);
-
-        // persist in localStorage
-        localStorage.setItem("user", JSON.stringify({ username: usernameInput }));
-
-        navigate("/");
+        alert("Signup successful! Please check your email to verify your account.");
+        navigate("/signin");
       } else {
         setError(res.data?.error || "Signup failed. Try again.");
       }
