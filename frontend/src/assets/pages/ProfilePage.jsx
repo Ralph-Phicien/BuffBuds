@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Post from "../components/Post";
 import { getUser, getUserPosts } from "../services/api";
 
-const ProfilePage = ({ username, userId, setIsAuthed, setUsername }) => {
+const ProfilePage = ({ userId, setIsAuthed, setUsername }) => {
+  const { username } = useParams();
   const [user, setUser] = useState({
     bio: "Loading bio...",
     profilePicture: "/logo.png",
