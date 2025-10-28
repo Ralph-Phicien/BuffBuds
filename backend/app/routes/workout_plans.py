@@ -1,122 +1,140 @@
-# app/routes/workout_plans.py
 from flask import Blueprint, request, jsonify, session
 from app.supabase_client import supabase
-from datetime import datetime
-import uuid
+from datetime import datetime, timezone
 
 workout_plans_bp = Blueprint("workout_plans", __name__)
 
-
-# ----------------------------
-# CREATE A WORKOUT PLAN
-# ----------------------------
-@workout_plans_bp.route("/", methods=["POST"])
+# --------------------------------------------------------
+# CREATE WORKOUT PLAN
+# --------------------------------------------------------
+@workout_plans_bp.route("", methods=["POST"])
 def create_workout_plan():
-    """
-    Add a new workout plan for the logged-in user.
-    """
+    """Insert a new workout plan row into workout_plans table."""
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
     data = request.get_json()
 
-    if not data.get("workoutPlan"):
-        return jsonify({"error": "Missing workoutPlan data"}), 400
+    if not data.get("name") or not data.get("exercises"):
+        return jsonify({"error": "Missing workout name or exercises"}), 400
 
-    # Fetch current plans
-    profile = supabase.table("user_profile").select("workout_plans").eq("id", user["id"]).single().execute()
-    plans = profile.data.get("workout_plans") or []
-
-    # Add new plan with unique ID and timestamp
     new_plan = {
-        "id": str(uuid.uuid4()),
-        "created_at": datetime.now(datetime.timezone.utc).isoformat(),
-        "workoutPlan": data["workoutPlan"]
+        "user_id": user["id"],
+        "plan_name": data["name"],
+        "description": data.get("description"),
+        "exercises": data["exercises"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
-    plans.append(new_plan)
 
-    # Update in Supabase
-    response = supabase.table("user_profile").update({"workout_plans": plans}).eq("id", user["id"]).execute()
-    return jsonify(new_plan), 201
+    result = supabase.table("workout_plans").insert(new_plan).execute()
+
+    if not result.data:
+        return jsonify({"error": "Failed to create workout plan"}), 500
+
+    return jsonify(result.data[0]), 201
 
 
-# ----------------------------
+# --------------------------------------------------------
 # GET ALL WORKOUT PLANS
-# ----------------------------
-@workout_plans_bp.route("/", methods=["GET"])
-def get_workout_plans():
-    """
-    Retrieve all workout plans for the logged-in user.
-    """
+# --------------------------------------------------------
+@workout_plans_bp.route("", methods=["GET"])
+def get_all_plans():
+    """Return all plans for the logged-in user."""
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
-    profile = supabase.table("user_profile").select("workout_plans").eq("id", user["id"]).single().execute()
-    plans = profile.data.get("workout_plans") or []
-    return jsonify(plans), 200
+    result = (
+        supabase.table("workout_plans")
+        .select("*")
+        .eq("user_id", user["id"])
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    return jsonify(result.data or []), 200
 
 
-# ----------------------------
-# GET A WORKOUT PLAN
-# ----------------------------
-@workout_plans_bp.route("/<plan_id>", methods=["GET"])
+# --------------------------------------------------------
+# GET SINGLE WORKOUT PLAN
+# --------------------------------------------------------
+@workout_plans_bp.route("/<int:plan_id>", methods=["GET"])
 def get_workout_plan(plan_id):
+    """Get one workout plan by numeric id."""
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
-    profile = supabase.table("user_profile").select("workout_plans").eq("id", user["id"]).single().execute()
-    plans = profile.data.get("workout_plans") or []
+    result = (
+        supabase.table("workout_plans")
+        .select("*")
+        .eq("user_id", user["id"])
+        .eq("id", plan_id)
+        .single()
+        .execute()
+    )
 
-    plan = next((p for p in plans if p["id"] == plan_id), None)
-    if not plan:
+    if not result.data:
         return jsonify({"error": "Workout plan not found"}), 404
-    return jsonify(plan), 200
+
+    return jsonify(result.data), 200
 
 
-# ----------------------------
+# --------------------------------------------------------
 # UPDATE WORKOUT PLAN
-# ----------------------------
-@workout_plans_bp.route("/<plan_id>", methods=["PUT"])
+# --------------------------------------------------------
+@workout_plans_bp.route("/<int:plan_id>", methods=["PUT"])
 def update_workout_plan(plan_id):
+    """Update an existing workout plan."""
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
     data = request.get_json()
-    profile = supabase.table("user_profile").select("workout_plans").eq("id", user["id"]).single().execute()
-    plans = profile.data.get("workout_plans") or []
 
-    for plan in plans:
-        if plan["id"] == plan_id:
-            if "workoutPlan" in data:
-                plan["workoutPlan"] = data["workoutPlan"]
-            plan["updated_at"] = datetime.now(datetime.timezone.utc).isoformat()
-            break
-    else:
+    updates = {}
+    if "plan_name" in data:
+        updates["plan_name"] = data["plan_name"]
+    if "description" in data:
+        updates["description"] = data["description"]
+    if "exercises" in data:
+        updates["exercises"] = data["exercises"]
+
+    result = (
+        supabase.table("workout_plans")
+        .update(updates)
+        .eq("user_id", user["id"])
+        .eq("id", plan_id)
+        .execute()
+    )
+
+    if not result.data:
         return jsonify({"error": "Workout plan not found"}), 404
 
-    supabase.table("user_profile").update({"workout_plans": plans}).eq("id", user["id"]).execute()
-    return jsonify(plan), 200
+    return jsonify(result.data[0]), 200
 
 
-# ----------------------------
-# DELETE A WORKOUT PLAN
-# ----------------------------
-@workout_plans_bp.route("/<plan_id>", methods=["DELETE"])
+# --------------------------------------------------------
+# DELETE WORKOUT PLAN
+# --------------------------------------------------------
+@workout_plans_bp.route("/<int:plan_id>", methods=["DELETE"])
 def delete_workout_plan(plan_id):
+    """Delete a workout plan by id."""
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
-    profile = supabase.table("user_profile").select("workout_plans").eq("id", user["id"]).single().execute()
-    plans = profile.data.get("workout_plans") or []
 
-    new_plans = [p for p in plans if p["id"] != plan_id]
-    if len(new_plans) == len(plans):
+    result = (
+        supabase.table("workout_plans")
+        .delete()
+        .eq("user_id", user["id"])
+        .eq("id", plan_id)
+        .execute()
+    )
+
+    if not result.data:
         return jsonify({"error": "Workout plan not found"}), 404
 
-    supabase.table("user_profile").update({"workout_plans": new_plans}).eq("id", user["id"]).execute()
     return jsonify({"message": "Workout plan deleted"}), 200
