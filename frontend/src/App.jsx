@@ -8,6 +8,8 @@ import ProfilePage from './assets/pages/ProfilePage.jsx'
 import Workout from './assets/pages/Workout'
 import CreateWorkout from './assets/pages/CreateWorkout.jsx'
 import { checkStatus } from "./assets/services/api";
+import WorkoutPlanPage from "./assets/pages/WorkoutPlanPage";
+
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -125,6 +127,12 @@ function App() {
           ) : (
             <Navigate to="/signin" replace />
           )
+        }
+      />
+      <Route
+        path="/select-workout"
+        element={
+          <WorkoutPlanPage />
         }
       />
     </Routes>
