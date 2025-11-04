@@ -123,7 +123,11 @@ function App() {
         path="/create-workout"
         element={
           isAuthed ? (
-            <CreateWorkout />
+            <CreateWorkout 
+              username={username}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
           ) : (
             <Navigate to="/signin" replace />
           )
@@ -132,7 +136,16 @@ function App() {
       <Route
         path="/select-workout"
         element={
-          <WorkoutPlanPage />
+          isAuthed ? (
+          <WorkoutPlanPage 
+            username={username}
+            setIsAuthed={setIsAuthed}
+            setUsername={setUsername}
+          />
+        ) : (
+          <Navigate to="/signin" replace />
+        )
+          
         }
       />
     </Routes>
