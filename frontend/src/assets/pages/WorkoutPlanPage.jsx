@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { getWorkoutPlans } from "../services/api"; 
+import { useNavigate } from "react-router-dom";''
 import Header from '../components/Header'
+
 const WorkoutPlansPage = ({username, setIsAuthed, setUsername }) => {
   const [workoutPlans, setWorkoutPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -59,7 +62,7 @@ const WorkoutPlansPage = ({username, setIsAuthed, setUsername }) => {
             </ul>
             <button
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              onClick={() => alert("Starting Workout")}
+              onClick={() => navigate(`/workout-sessions`, {state: {selectedPlan}})}
             >
               Start Workout
             </button>

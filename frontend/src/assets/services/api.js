@@ -44,3 +44,7 @@ export const updateWorkoutPlan = (id, data) => API.put(`/plans/${id}`, data);
 export const deleteWorkoutPlan = (id) => API.delete(`/plans/${id}`);
 
 /* WORKOUT SESSIONS */
+export const createWorkoutSession = (data) => API.post("/sessions", data);
+export const getWorkoutSessions = () => API.get("/sessions");
+export const updateWorkoutSession = (id, data) => API.put(`/sessions/${id}`, data);
+

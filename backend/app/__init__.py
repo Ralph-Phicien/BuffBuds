@@ -50,7 +50,7 @@ def create_app(config_object='app.config.DevelopmentConfig'):
         app.register_blueprint(auth_bp, url_prefix='/auth')
         app.register_blueprint(user_bp, url_prefix='/user')
         app.register_blueprint(posts_bp, url_prefix='/posts')
-        app.register_blueprint(workout_logs_bp, url_prefix='/workout')
+        app.register_blueprint(workout_logs_bp, url_prefix='/sessions')
         app.register_blueprint(workout_plans_bp, url_prefix='/plans')
 
 
