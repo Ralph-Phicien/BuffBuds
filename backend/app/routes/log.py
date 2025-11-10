@@ -1,17 +1,17 @@
+from urllib import response
 from flask import Blueprint, request, jsonify, session
 from app.supabase_client import supabase
-from datetime import datetime
-import uuid
+from datetime import datetime, timezone
 from pydantic import ValidationError
 from app.schemas import WorkoutCreate
 
-workout_logs_bp = Blueprint("workout_logs", __name__)
+workout_logs_bp = Blueprint("sessions", __name__)
 
 
 # ----------------------------
 # CREATE A WORKOUT SESSION
 # ----------------------------
-@workout_logs_bp.route("/", methods=["POST"])
+@workout_logs_bp.route("", methods=["POST"])
 def create_workout_session():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
@@ -22,16 +22,15 @@ def create_workout_session():
         return jsonify({"errors": e.errors()}), 400
 
     record = {
-        "id": str(uuid.uuid4()),
-        "created_at": datetime.now(datetime.timezone.utc).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "user_id": session["user"]["id"],
         "session_date": data.session_date,
         "notes": data.notes,
-        "workout_plan": data.workoutPlan
+        "workout_plan": data.workoutPlan.model_dump()
     }
-    response = supabase.table("WorkoutLogs").insert([record]).execute()
+    response = supabase.table("workout_session").insert([record]).execute()
 
-    if response.error:
+    if not response.data:
         return jsonify({"error": "Failed to create workout session"}), 500
 
     return jsonify(response.data[0]), 201
@@ -40,13 +39,13 @@ def create_workout_session():
 # ----------------------------
 # GET ALL WORKOUT SESSIONS FOR THE USER
 # ----------------------------
-@workout_logs_bp.route("/", methods=["GET"])
+@workout_logs_bp.route("", methods=["GET"])
 def get_user_workout_sessions():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user_id = session["user"]["id"]
-    response = supabase.table("WorkoutLogs").select("*").eq("user_id", user_id).execute()
+    response = supabase.table("workout_session").select("*").eq("user_id", user_id).execute()
 
     if response.error:
         return jsonify({"error": "Failed to fetch sessions"}), 500
@@ -63,7 +62,7 @@ def update_workout_session(session_id):
         return jsonify({"error": "Unauthorized"}), 401
 
     # Verify ownership
-    response = supabase.table("WorkoutLogs").select("user_id").eq("id", session_id).single().execute()
+    response = supabase.table("workout_session").select("user_id").eq("id", session_id).single().execute()
     if not response.data:
         return jsonify({"error": "Workout session not found"}), 404
     if response.data["user_id"] != session["user"]["id"]:
@@ -85,11 +84,11 @@ def update_workout_session(session_id):
             return jsonify({"errors": e.errors()}), 400
 
     # Perform update
-    update_response = supabase.table("WorkoutLogs").update(updates).eq("id", session_id).execute()
+    update_response = supabase.table("workout_session").update(updates).eq("id", session_id).execute()
 
     if update_response.error:
         return jsonify({"error": "Failed to update session"}), 500
 
     # Return the updated session
-    updated_session = supabase.table("WorkoutLogs").select("*").eq("id", session_id).single().execute()
+    updated_session = supabase.table("workout_session").select("*").eq("id", session_id).single().execute()
     return jsonify(updated_session.data), 200

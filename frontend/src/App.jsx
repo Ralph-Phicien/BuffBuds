@@ -9,7 +9,7 @@ import Workout from './assets/pages/Workout'
 import CreateWorkout from './assets/pages/CreateWorkout.jsx'
 import { checkStatus } from "./assets/services/api";
 import WorkoutPlanPage from "./assets/pages/WorkoutPlanPage";
-
+import WorkoutSession from "./assets/pages/WorkourSession.jsx";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -123,7 +123,11 @@ function App() {
         path="/create-workout"
         element={
           isAuthed ? (
-            <CreateWorkout />
+            <CreateWorkout 
+              username={username}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
           ) : (
             <Navigate to="/signin" replace />
           )
@@ -132,7 +136,29 @@ function App() {
       <Route
         path="/select-workout"
         element={
-          <WorkoutPlanPage />
+          isAuthed ? (
+          <WorkoutPlanPage 
+            username={username}
+            setIsAuthed={setIsAuthed}
+            setUsername={setUsername}
+          />
+        ) : (
+          <Navigate to="/signin" replace />
+        )    
+        }
+      />
+      <Route
+        path="/workout-sessions"
+        element={
+          isAuthed ? (
+            <WorkoutSession
+              username={username}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
+          ) : (
+            <Navigate to="/signin" replace />
+          )
         }
       />
     </Routes>

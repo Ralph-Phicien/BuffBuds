@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getWorkoutPlans } from "../services/api"; 
+import { useNavigate } from "react-router-dom";''
+import Header from '../components/Header'
 
-const WorkoutPlansPage = () => {
+const WorkoutPlansPage = ({username, setIsAuthed, setUsername }) => {
   const [workoutPlans, setWorkoutPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -28,41 +31,45 @@ const WorkoutPlansPage = () => {
   if (!workoutPlans.length) return <p className="text-center mt-8">No workout plans found.</p>;
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Workout Plans</h1>
+    <div>
+      <Header username={username} setIsAuthed={setIsAuthed} setUsername={setUsername} />
+      <div className="p-8 max-w-5xl mx-auto">
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {workoutPlans.map((plan) => (
-          <div
-            key={plan.id}
-            onClick={() => setSelectedPlan(plan)}
-            className="border rounded-2xl p-4 shadow hover:shadow-lg cursor-pointer transition"
-          >
-            <h2 className="text-xl font-semibold">{plan.plan_name}</h2>
-            <p>{plan.description}</p>
-          </div>
-        ))}
-      </div>
+        <h1 className="text-3xl font-bold mb-6 text-center">Your Workout Plans</h1>
 
-      {selectedPlan && (
-        <div className="mt-6 p-6 border rounded-xl bg-gray-50">
-          <h2 className="text-2xl font-bold">{selectedPlan.plan_name}</h2>
-          <ul className="list-disc ml-6 mt-2">
-            {selectedPlan.exercises.map((ex, index) => (
-              <li key={index}>
-                {ex.name} — {ex.sets} sets × {ex.reps} reps
-              </li>
-            ))}
-          </ul>
-          <button
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            onClick={() => alert("Starting Workout")}
-          >
-            Start Workout
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {workoutPlans.map((plan) => (
+            <div
+              key={plan.id}
+              onClick={() => setSelectedPlan(plan)}
+              className="border rounded-2xl p-4 shadow hover:shadow-lg cursor-pointer transition"
+            >
+              <h2 className="text-xl font-semibold">{plan.plan_name}</h2>
+              <p>{plan.description}</p>
+            </div>
+          ))}
         </div>
-      )}
-    </div>
+
+        {selectedPlan && (
+          <div className="mt-6 p-6 border rounded-xl bg-gray-50">
+            <h2 className="text-2xl font-bold">{selectedPlan.plan_name}</h2>
+            <ul className="list-disc ml-6 mt-2">
+              {selectedPlan.exercises.map((ex, index) => (
+                <li key={index}>
+                  {ex.name} — {ex.sets} sets × {ex.reps} reps
+                </li>
+              ))}
+            </ul>
+            <button
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              onClick={() => navigate(`/workout-sessions`, {state: {selectedPlan}})}
+            >
+              Start Workout
+            </button>
+          </div>
+        )}
+      </div>
+    </div>  
   );
 };
 
