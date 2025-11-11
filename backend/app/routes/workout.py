@@ -30,9 +30,36 @@ def create_workout():
         "exercise_weight": data.get("exercise_weight"),
         "notes": data.get("notes"),
     }
-
     response = supabase.table("workout_session").insert(workout).execute() # type: ignore
+
+    # Update personal records if applicable
+    if response.data:   
+        exercise = data.get("exercise_name", "").lower()
+        weight = data.get("exercise_weight", 0)
+        user_id = user["id"]
+
+        # Retrieve current PRs for the user
+        profile = supabase.table("user_profile").select(
+            "bench_pr, squat_pr, deadlift_pr"
+        ).eq("id", user_id).single().execute()
+
+        if profile.data:
+            prs = profile.data
+            update_data = {}
+
+            # Compare and update PRs if new record is higher
+            if exercise == "bench" and weight > prs.get("bench_pr", 0):
+                update_data["bench_pr"] = weight
+            elif exercise == "squat" and weight > prs.get("squat_pr", 0):
+                update_data["squat_pr"] = weight
+            elif exercise == "deadlift" and weight > prs.get("deadlift_pr", 0):
+                update_data["deadlift_pr"] = weight
+
+            # Apply PR updates
+            if update_data:
+                supabase.table("user_profile").update(update_data).eq("id", user_id).execute()
     return jsonify(response.data[0]), 201
+
 
 
 # ----------------------------
