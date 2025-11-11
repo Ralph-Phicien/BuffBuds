@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signup } from "../services/api";
 
-const SignUp = ({ setIsAuthed, setUsername }) => {
+const SignUp = () => {
   const [usernameInput, setUsernameInput] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,13 +21,8 @@ const SignUp = ({ setIsAuthed, setUsername }) => {
       });
 
       if (res.status === 201) {
-        setIsAuthed(true);
-        setUsername(usernameInput);
-
-        // persist in localStorage
-        localStorage.setItem("user", JSON.stringify({ username: usernameInput }));
-
-        navigate("/");
+        alert("Signup successful! Please check your email to verify your account.");
+        navigate("/signin");
       } else {
         setError(res.data?.error || "Signup failed. Try again.");
       }
