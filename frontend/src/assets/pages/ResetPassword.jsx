@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "../services/supabaseClient";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -32,22 +31,27 @@ const ResetPassword = () => {
     }
 
     try {
-      const { data, error } = await supabase.auth.updateUser(
-        { password },
-        { accessToken }
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          password,
+          access_token: accessToken,
+        }),
+      });
 
-      if (error) {
-        setError(error.message);
+      const result = await res.json();
+
+      if (!res.ok) {
+        setError(result.error || "Failed to reset password.");
       } else {
         setMessage("Password updated successfully! Redirecting to login...");
-        setTimeout(() => {
-          navigate("/signin");
-        }, 3000);
+        setTimeout(() => navigate("/signin"), 3000);
       }
     } catch (err) {
-      console.error("Reset password error:", err);
-      setError("Failed to reset password. Try again.");
+      console.error(err);
+      setError("Server error. Try again.");
     }
   };
 
