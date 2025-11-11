@@ -32,7 +32,33 @@ def create_workout_session():
 
     if not response.data:
         return jsonify({"error": "Failed to create workout session"}), 500
+    
+    # Update personal records if applicable
+    if response.data:   
+        exercise = getattr(data, "exercise_name", "").lower()
+        weight = getattr(data, "exercise_weight", 0)
+        user_id = session["user"]["id"]
 
+        # Retrieve current PRs for the user
+        profile = supabase.table("user_profile").select(
+            "bench_pr, squat_pr, deadlift_pr"
+        ).eq("id", user_id).single().execute()
+
+        if profile.data:
+            prs = profile.data
+            update_data = {}
+
+            # Compare and update PRs if new record is higher
+            if exercise == "bench" and weight > prs.get("bench_pr", 0):
+                update_data["bench_pr"] = weight
+            elif exercise == "squat" and weight > prs.get("squat_pr", 0):
+                update_data["squat_pr"] = weight
+            elif exercise == "deadlift" and weight > prs.get("deadlift_pr", 0):
+                update_data["deadlift_pr"] = weight
+
+            # Apply PR updates
+            if update_data:
+                supabase.table("user_profile").update(update_data).eq("id", user_id).execute()
     return jsonify(response.data[0]), 201
 
 
@@ -92,3 +118,4 @@ def update_workout_session(session_id):
     # Return the updated session
     updated_session = supabase.table("workout_session").select("*").eq("id", session_id).single().execute()
     return jsonify(updated_session.data), 200
+
