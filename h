@@ -1,0 +1,87 @@
+[33m4f8ad26[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #136 from Derikcolucci/forgot_password
+[33m70b0e3d[m[33m ([m[1;31mgithub-desktop-Derikcolucci/forgot_password[m[33m, [m[1;32mpr/136[m[33m)[m Adding forgot password feature.
+[33m3051374[m Create issue: Display Personal Records on Profile Page
+[33m2c0e963[m[33m ([m[1;31morigin/108-create-react-page-for-workouts-with-create-and-open-buttons[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/social-features-epic[m[33m)[m Merge pull request #107 from DylanLiesenfelt/dev
+[33m4a3d836[m Merge pull request #105 from DylanLiesenfelt/61-posts-likes-features
+[33mc22cdce[m Add like/unlike functionality with user tracking
+[33m3b9d02c[m Merge pull request #104 from DylanLiesenfelt/54-most-recent-posts-on-user-profile
+[33m760c607[m Add user search with live suggestions to Header
+[33mdfa28ce[m Merge pull request #103 from DylanLiesenfelt/54-most-recent-posts-on-user-profile
+[33m1295a28[m Refactor ProfilePage layout and post rendering
+[33ma111435[m Fixed api.js error
+[33m3fe2eb7[m Update api.js
+[33md5047ca[m Merge pull request #99 from Derikcolucci/workout_generator_feature
+[33mdf063fb[m Merge pull request #100 from DylanLiesenfelt/social-features-epic
+[33m0c8926c[m[33m ([m[1;31mgithub-desktop-Derikcolucci/workout_generator_feature[m[33m)[m Workout generator
+[33mc30268a[m Merge pull request #97 from DylanLiesenfelt/post-react-component
+[33maa577bc[m Build: Post Component
+[33mb47bd13[m Merge pull request #96 from DylanLiesenfelt/social-features-epic
+[33mab29db5[m Add user profile page with user posts and update API routes
+[33m71f3867[m Merge pull request #95 from DylanLiesenfelt/clean-up-frontend-apijs
+[33mbabaa51[m[33m ([m[1;31morigin/clean-up-frontend-apijs[m[33m, [m[1;32mclean-up-frontend-apijs[m[33m)[m Merge branch 'social-features-epic' into clean-up-frontend-apijs
+[33m90f9654[m Fix: logout functionality on feed
+[33m0f3bbb5[m Refactor: api.js
+[33m038d906[m Merge pull request #94 from easantome/user-profile-page
+[33m0b6207b[m[33m ([m[1;31measantome/user-profile-page[m[33m, [m[1;32muser-profile-page[m[33m)[m add mock profilepage with posts grid and footer
+[33m676ad43[m[33m ([m[1;31mgithub-desktop-Ralph-Phicien/main[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/HEAD[m[33m, [m[1;31measantome/main[m[33m, [m[1;31measantome/HEAD[m[33m)[m chore: updated CONTRIBUTING.md
+[33mdfebb41[m clean: pathing to public
+[33m2465399[m Merge pull request #90 from DylanLiesenfelt/fix-index-title
+[33m98bf384[m changed site title added icon
+[33m78998b6[m Merge pull request #89 from DylanLiesenfelt/dev
+[33m646fa06[m Merge pull request #88 from DylanLiesenfelt/social-features-epic
+[33m893bb5c[m Merge branch 'social-features-epic' of https://github.com/DylanLiesenfelt/BuffBuds into social-features-epic
+[33m52eec20[m Merge pull request #87 from DylanLiesenfelt/followers_likes_features
+[33mea054ba[m Merge pull request #84 from Derikcolucci/followers_likes_features
+[33m5ae7404[m Merge pull request #85 from Ralph-Phicien/social-features-epic
+[33mc30214a[m Build post database
+[33m7c5c5bd[m[33m ([m[1;31mgithub-desktop-Derikcolucci/followers_likes_features[m[33m)[m Adding routes for follower and like systems. Added the username parameter to update and delete user to avoid any error from calling without the parameter.
+[33mbcf1797[m Merge pull request #81 from DylanLiesenfelt/43-header-react-component-persistent-across-views
+[33m44ad001[m Add Header component and integrate into Feed page
+[33m11be6fe[m Merge pull request #80 from DylanLiesenfelt/dev
+[33me159ffd[m Merge pull request #79 from DylanLiesenfelt/77-bug-deployed-cookiecors-handling-for-user-auth-fails
+[33m2659b5e[m Remove debug console logs from auth check
+[33m49d443e[m Pass auth state setters to SignIn component
+[33m40b22dd[m Merge pull request #78 from DylanLiesenfelt/46-saving-and-modifying-json-object-from-exercisesapi
+[33ma0736e9[m Add workouts_by_muscles.json data file
+[33m9bbc8cb[m Merge pull request #76 from DylanLiesenfelt/dev
+[33m386b38e[m Merge pull request #75 from DylanLiesenfelt/set-user
+[33m4b15c6b[m Include username in user session and frontend state
+[33m6d87b53[m Switch backend to ProductionConfig and update CORS
+[33m1fe9db4[m Update __init__.py
+[33ma0b18d6[m Improve API request handling and error reporting
+[33m4c5ea36[m Update App.jsx
+[33m0866e16[m Remove .railwayignore and Procfile
+[33m8870b2b[m Add deployment configs and fix frontend imports
+[33m1e1649b[m Revise hosting details and update roadmap
+[33m0dcc87f[m Merge pull request #74 from DylanLiesenfelt/user-management-epic
+[33m3ebce13[m Merge pull request #73 from DylanLiesenfelt/user-state-management
+[33meb8bd3b[m Implement authentication and user profile integration
+[33mdc0064c[m Add authentication logic to SignIn page
+[33m9ab8256[m Add signup form state and submission logic
+[33me6c3c24[m build: api.js
+[33mc5a1a38[m fix: fixed, reorganizzed, and moved /routes files
+[33m8d10665[m cleanup: backend directory oragnization
+[33m2722809[m Merge pull request #72 from DylanLiesenfelt/user-management-epic
+[33mb61acd8[m Merge pull request #71 from DylanLiesenfelt/30-sign-inup-react-views
+[33m9c21536[m style: signup tailwind
+[33m4e7ece5[m style: tailwind classes for signup
+[33m88414d6[m build: basic styling
+[33m100c5f3[m build: basic form
+[33m7914747[m fix: pathing errors
+[33m6763c7d[m build: Init page/routes
+[33md793a48[m Merge pull request #70 from Ralph-Phicien/user-management-epic
+[33m05fa46e[m[33m ([m[1;31mgithub-desktop-Ralph-Phicien/user-management-epic[m[33m)[m setting up supabase client
+[33md7a60be[m Merge pull request #68 from DylanLiesenfelt/user-management-epic
+[33m832c5b1[m[33m ([m[1;31mgithub-desktop-Ralph-Phicien/build-supabase-client[m[33m)[m Merge pull request #65 from Derikcolucci/dev
+[33mf49e0a7[m[33m ([m[1;31mgithub-desktop-Derikcolucci/dev[m[33m)[m Setting up the Flask Structure, organized directory, tested and confirmed all apit routes are functional.
+[33mfe0241a[m[33m ([m[1;31mgithub-desktop-Ralph-Phicien/sign-up-page[m[33m, [m[1;31mgithub-desktop-Derikcolucci/main[m[33m, [m[1;31mgithub-desktop-Derikcolucci/HEAD[m[33m)[m Merge pull request #27 from DylanLiesenfelt/dev
+[33ma4dfe55[m[33m ([m[1;31mgithub-desktop-Ralph-Phicien/user-profile-page[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/sign-inup-react-views[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/sign-in-page[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/main-feedhome[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/header-react-component[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/friendsfollowers-system[m[33m, [m[1;31mgithub-desktop-Ralph-Phicien/data-storage-and-communications[m[33m, [m[1;31mgithub-desktop-Derikcolucci/user-profile-page[m[33m, [m[1;31mgithub-desktop-Derikcolucci/user-management-epic[m[33m, [m[1;31mgithub-desktop-Derikcolucci/social-features-epic[m[33m, [m[1;31mgithub-desktop-Derikcolucci/sign-inup-react-views[m[33m, [m[1;31mgithub-desktop-Derikcolucci/main-feedhome[m[33m, [m[1;31mgithub-desktop-Derikcolucci/header-react-component[m[33m, [m[1;31mgithub-desktop-Derikcolucci/friendsfollowers-system[m[33m, [m[1;31mgithub-desktop-Derikcolucci/data-storage-and-communications[m[33m)[m Merge branch 'main' into dev
+[33m3065582[m doc: Update live link in README
+[33m06af502[m Update live link format in README
+[33m28b6ded[m Update live link in README.md
+[33m576533b[m Merge pull request #26 from DylanLiesenfelt/folders-setup
+[33ma993b0d[m chore: Initial project structure
+[33mdb831ac[m Change project name to 'BuffBuds'
+[33ma203949[m Update README.md
+[33m9e69e0c[m init
+[33mb4eb191[m Initial commit

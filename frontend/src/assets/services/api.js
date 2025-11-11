@@ -1,5 +1,4 @@
 import axios from "axios";
-import { supabase } from "./supabaseClient";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -15,12 +14,6 @@ export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
 export const logout = () => API.post("/auth/logout");
 export const checkStatus = () => API.get("/auth/status");
-export const resetPassword = async (email) => {
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: import.meta.env.VITE_PASSWORD_RESET_REDIRECT || "http://localhost:5173/reset-password",
-  });
-  return { data, error };
-};
 
 /* POSTS */
 export const createPost = (data) => API.post("/posts", data);
