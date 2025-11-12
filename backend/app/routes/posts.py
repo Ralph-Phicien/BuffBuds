@@ -1,7 +1,7 @@
 # app/routes/posts.py
 from flask import Blueprint, request, jsonify, session
 from app.supabase_client import supabase
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 posts_bp = Blueprint("posts", __name__)
@@ -28,12 +28,11 @@ def create_post():
         return jsonify({"error": "User profile not found"}), 404
 
     post = {
-        "id": str(uuid.uuid4()),
         "user_id": profile.data["id"],
         "content": data.get("content"),
         "like_count": 0,
         "comments": [],
-        "created_at": datetime.now(datetime.timezone.utc).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "title": data.get("title")
     }
 
@@ -149,7 +148,7 @@ def add_comment(post_id):
     comment = {
         "username": user["username"],
         "text": data.get("text"),
-        "created_at": datetime.now(datetime.timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
 
     # Fetch existing comments

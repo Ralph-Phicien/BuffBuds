@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Header from "../components/Header";
-import { createWorkoutSession } from "../services/api";
+import { createWorkoutSession, createPost } from "../services/api";
 
 const WorkoutSession = ({ username, setIsAuthed, setUsername }) => {
   const location = useLocation();
@@ -27,67 +27,131 @@ const WorkoutSession = ({ username, setIsAuthed, setUsername }) => {
     e.preventDefault();
 
     try {
+      console.log("🧩 handleSubmit called");
+      console.log("Form data:", formData);
+      console.log("Plan:", plan);
+
+      // ✅ Compute total volume
+      const totalVolume = formData.reduce((acc, ex) => {
+        return (
+          acc +
+          ex.sets.reduce(
+            (sum, s) =>
+              sum +
+              parseFloat(s.weight || 0) * parseInt(s.reps || 0),
+            0
+          )
+        );
+      }, 0);
+
+      console.log("✅ totalVolume:", totalVolume);
+
+      // ✅ Build payload using correct schema
       const payload = {
-        // ✅ only send date (YYYY-MM-DD)
-        session_date: new Date().toISOString().split("T")[0],
         notes: `Workout for plan: ${plan.plan_name}`,
+        total_volume: totalVolume,
         workoutPlan: {
           name: plan.plan_name,
           description: plan.description || "",
-          exercises: formData.map((ex) => {
-            // compute averages or totals for all sets
-            const totalWeight = ex.sets.reduce(
-              (acc, s) => acc + parseFloat(s.weight || 0),
-              0
-            );
-            const totalReps = ex.sets.reduce(
-              (acc, s) => acc + parseInt(s.reps || 0),
-              0
-            );
-            const avgWeight =
-              ex.sets.length > 0 ? totalWeight / ex.sets.length : 0;
-            const avgReps = ex.sets.length > 0 ? totalReps / ex.sets.length : 0;
-
-            return {
-              name: ex.name,
-              type: "strength", // or cardio, etc.
-              sets: ex.sets.length,
-              reps: avgReps,
-              exercise_weight: avgWeight,
-            };
-          }),
+          exercises: formData.map((ex) => ({
+            name: ex.name,
+            type: "strength",
+            sets: ex.sets.map((s) => ({
+              weight: parseFloat(s.weight || 0),
+              reps: parseInt(s.reps || 0),
+            })),
+          })),
         },
       };
 
+      console.log("Submitting payload:", payload);
+
+      // ✅ Create workout session
       await createWorkoutSession(payload);
-      alert("Workout session logged successfully!");
-      navigate("/");
+
+      // ✅ Build post content
+      const exercises = formData
+        .map((ex) => {
+          const setDetails = ex.sets
+            .map(
+              (s, i) =>
+                `- Set ${i + 1}: ${s.reps || 0} reps @ ${parseFloat(
+                  s.weight || 0
+                ).toFixed(1)} lbs`
+            )
+            .join("\n");
+          return `${ex.name}\n${setDetails}`;
+        })
+        .join("\n\n");
+
+      const postTitle = `Completed ${plan.plan_name}`;
+      const postContent = `
+      🏋️ Workout Summary
+      Total Volume: ${totalVolume.toFixed(1)} lbs
+
+      Exercises:
+      ${formData
+        .map((ex) => {
+          const setDetails = ex.sets
+            .map(
+              (s, i) =>
+                `  - Set ${i + 1}: ${s.reps || 0} reps @ ${parseFloat(
+                  s.weight || 0
+                ).toFixed(1)} lbs`
+            )
+            .join("\n");
+          return `${ex.name}\n${setDetails}`;
+        })
+        .join("\n\n")}
+
+      Notes:
+      ${payload.notes || "No notes today."}
+      `;
+
+
+      // ✅ Create the post
+      await createPost({ title: postTitle, content: postContent });
+
+      alert("Workout session logged and post created!");
+      navigate("/"); // redirect to feed root
     } catch (err) {
-      console.error("Failed to submit session:", err);
+      console.error("🔥 handleSubmit failed:", err);
       alert("Failed to log workout session");
     }
   };
 
   if (!plan)
-    return <p className="text-center mt-8 text-red-500">No workout plan selected.</p>;
+    return (
+      <p className="text-center mt-8 text-red-500">
+        No workout plan selected.
+      </p>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50">
-        <Header 
-            username={username}
-            setIsAuthed={setIsAuthed}
-            setUsername={setUsername} 
-        />
+      <Header
+        username={username}
+        setIsAuthed={setIsAuthed}
+        setUsername={setUsername}
+      />
+
       <div className="max-w-3xl mx-auto p-8">
-        <h1 className="text-3xl font-bold mb-6 text-center">{plan.plan_name}</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          {plan.plan_name}
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {formData.map((exercise, exIndex) => (
-            <div key={exIndex} className="border rounded-xl p-4 bg-white shadow">
+            <div
+              key={exIndex}
+              className="border rounded-xl p-4 bg-white shadow"
+            >
               <h2 className="text-xl font-semibold mb-2">{exercise.name}</h2>
               {exercise.sets.map((set, setIndex) => (
                 <div key={setIndex} className="flex gap-3 mb-2">
-                  <span className="w-12 font-medium">Set {setIndex + 1}</span>
+                  <span className="w-12 font-medium">
+                    Set {setIndex + 1}
+                  </span>
                   <input
                     type="number"
                     placeholder="Weight"
