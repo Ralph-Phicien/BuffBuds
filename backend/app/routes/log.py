@@ -1,7 +1,7 @@
 from urllib import response
 from flask import Blueprint, request, jsonify, session
 from app.supabase_client import supabase
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pydantic import ValidationError
 from app.schemas import WorkoutCreate
 
@@ -21,12 +21,17 @@ def create_workout_session():
     except ValidationError as e:
         return jsonify({"errors": e.errors()}), 400
 
+    total_volume = 0
+    for ex in data.workoutPlan.exercises:
+        total_volume += ex.sets * ex.reps * ex.exercise_weight
+
     record = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "user_id": session["user"]["id"],
         "session_date": data.session_date,
         "notes": data.notes,
-        "workout_plan": data.workoutPlan.model_dump()
+        "workout_plan": data.workoutPlan.model_dump(),
+        "total_volume": total_volume,
     }
     response = supabase.table("workout_session").insert([record]).execute()
 
