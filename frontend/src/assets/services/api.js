@@ -25,7 +25,7 @@ export const getPosts = () => API.get("/posts");
 export const getPost = (id) => API.get(`/posts/${id}`);
 export const likePost = (id) => API.post(`/posts/${id}/like`);
 export const unlikePost = (id) => API.put(`/posts/${id}/unlike`);
-export const commentOnPost = (id, data) => API.post(`/posts/${id}/comment`, data);
+export const commentOnPost = (id, data) => API.post(`/posts/${id}/comment`, data, {headers: {"Content-Type": "application/json"}});
 export const updatePost = (id, data) => API.put(`/posts/${id}`, data);
 export const deletePost = (id) => API.delete(`/posts/${id}`);
 export const getUserPosts = (username) => API.get(`/posts/user/${username}`);

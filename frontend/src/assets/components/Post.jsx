@@ -65,10 +65,8 @@ const Post = ({ post, currentUserId, currentUsername }) => {
   setCommentText("");
 
   try {
-    const res = await commentOnPost(post.id, { text: newComment.text });
+    await commentOnPost(post.id, { text: newComment.text });
 
-    // Update with backend data in case something changed
-    setComments(res.comments ?? res.data?.comments ?? []);
   } catch (err) {
     console.error("Error adding comment:", err);
     

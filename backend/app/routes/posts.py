@@ -142,15 +142,13 @@ def comment_post(post_id):
         return jsonify({"error": "User not logged in"}), 401
 
     data = request.get_json()
-    comment_text = data.get("comment")
+    comment_text = data.get("text")
 
     if not comment_text:
         return jsonify({"error": "Comment cannot be empty"}), 400
 
     # Get current user info
     user = session["user"]
-    user_id = user["id"]
-    user_email = user["email"]
 
     # Fetch the current post
     post_response = supabase.table("Posts").select("comments").eq("id", post_id).execute()
@@ -161,13 +159,13 @@ def comment_post(post_id):
     # Get the existing comments (if any)
     existing_comments = post_response.data[0].get("comments") or []
 
-    # Create the new comment
+    # new comment
     new_comment = {
-        "user_id": user_id,
-        "user_email": user_email,
-        "content": comment_text,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
+    "username": user.get("username", "unknown"),
+    "text": comment_text,
+    "created_at": datetime.now(timezone.utc).isoformat(),
+}
+
 
     # Append the new comment to the list
     updated_comments = existing_comments + [new_comment]
