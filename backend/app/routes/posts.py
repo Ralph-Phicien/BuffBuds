@@ -202,10 +202,16 @@ def get_comments(post_id):
 # ----------------------------
 @posts_bp.route("/<post_id>/comment/<int:comment_index>", methods=["DELETE"])
 def delete_comment(post_id, comment_index):
+    """
+    Delete a specific comment from a post.
+    Only the comment's author can delete it.
+    """
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
+
+    # Fetch the post's comments
     post = supabase.table("Posts").select("comments").eq("id", post_id).single().execute()
     if not post.data:
         return jsonify({"error": "Post not found"}), 404
@@ -214,11 +220,14 @@ def delete_comment(post_id, comment_index):
     if comment_index < 0 or comment_index >= len(comments):
         return jsonify({"error": "Invalid comment index"}), 400
 
-    # Only allow deletion of own comment
+    # Only allow deletion if the current user is the comment author
     if comments[comment_index]["username"] != user["username"]:
         return jsonify({"error": "Unauthorized"}), 403
 
+    # Remove the comment
     comments.pop(comment_index)
+
+    # Update Supabase
     supabase.table("Posts").update({"comments": comments}).eq("id", post_id).execute()
 
     return jsonify({"message": "Comment deleted"}), 200
