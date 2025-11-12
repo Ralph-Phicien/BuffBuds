@@ -1,7 +1,7 @@
 # app/routes/posts.py
 from flask import Blueprint, request, jsonify, session
 from app.supabase_client import supabase
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 posts_bp = Blueprint("posts", __name__)
@@ -134,34 +134,97 @@ def unlike_post(post_id):
 # ADD COMMENT
 # ----------------------------
 @posts_bp.route("/<post_id>/comment", methods=["POST"])
-def add_comment(post_id):
+def comment_post(post_id):
     """
     Add a comment to a post.
-    - Requires logged-in user.
-    - Stores comments as JSONB array in Supabase.
     """
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    data = request.get_json()
+    comment_text = data.get("comment")
+
+    if not comment_text:
+        return jsonify({"error": "Comment cannot be empty"}), 400
+
+    # Get current user info
+    user = session["user"]
+    user_id = user["id"]
+    user_email = user["email"]
+
+    # Fetch the current post
+    post_response = supabase.table("Posts").select("comments").eq("id", post_id).execute()
+
+    if not post_response.data or len(post_response.data) == 0:
+        return jsonify({"error": "Post not found"}), 404
+
+    # Get the existing comments (if any)
+    existing_comments = post_response.data[0].get("comments") or []
+
+    # Create the new comment
+    new_comment = {
+        "user_id": user_id,
+        "user_email": user_email,
+        "content": comment_text,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Append the new comment to the list
+    updated_comments = existing_comments + [new_comment]
+
+    # Update Supabase
+    update_response = (
+        supabase.table("Posts")
+        .update({"comments": updated_comments})
+        .eq("id", post_id)
+        .execute()
+    )
+
+    if update_response.data is None:
+        return jsonify({"error": "Failed to update comments"}), 500
+
+    return jsonify({"message": "Comment added successfully", "comment": new_comment}), 200
+
+
+
+
+# ----------------------------
+# GET COMMENTS FOR A POST
+# ----------------------------
+@posts_bp.route("/<post_id>/comments", methods=["GET"])
+def get_comments(post_id):
+    post = supabase.table("Posts").select("comments").eq("id", post_id).single().execute()
+    if not post.data:
+        return jsonify({"error": "Post not found"}), 404
+    return jsonify(post.data.get("comments", [])), 200
+
+
+# ----------------------------
+# COMMENT DELETION
+# ----------------------------
+@posts_bp.route("/<post_id>/comment/<int:comment_index>", methods=["DELETE"])
+def delete_comment(post_id, comment_index):
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     user = session["user"]
-    data = request.get_json()
-
-    comment = {
-        "username": user["username"],
-        "text": data.get("text"),
-        "created_at": datetime.now(datetime.timezone.utc).isoformat()
-    }
-
-    # Fetch existing comments
     post = supabase.table("Posts").select("comments").eq("id", post_id).single().execute()
     if not post.data:
         return jsonify({"error": "Post not found"}), 404
 
-    comments = post.data["comments"] or []
-    comments.append(comment)
+    comments = post.data.get("comments", [])
+    if comment_index < 0 or comment_index >= len(comments):
+        return jsonify({"error": "Invalid comment index"}), 400
 
-    response = supabase.table("Posts").update({"comments": comments}).eq("id", post_id).execute()
-    return jsonify(response.data[0]), 200
+    # Only allow deletion of own comment
+    if comments[comment_index]["username"] != user["username"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    comments.pop(comment_index)
+    supabase.table("Posts").update({"comments": comments}).eq("id", post_id).execute()
+
+    return jsonify({"message": "Comment deleted"}), 200
+
 
 
 # ----------------------------
