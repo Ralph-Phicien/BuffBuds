@@ -9,7 +9,6 @@ export const API = axios.create({
   withCredentials: true,
 });
 
-console.log(import.meta.env.VITE_API_BASE);
 
 
 /* AUTH */
@@ -17,6 +16,8 @@ export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
 export const logout = () => API.post("/auth/logout");
 export const checkStatus = () => API.get("/auth/status");
+export const resetPassword = (email) => API.post("/auth/reset-password-request", { email });
+
 
 /* POSTS */
 export const createPost = (data) => API.post("/posts", data);

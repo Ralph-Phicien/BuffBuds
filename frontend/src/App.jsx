@@ -7,6 +7,7 @@ import SignUp from './assets/pages/SignUp'
 import ProfilePage from './assets/pages/ProfilePage.jsx'
 import Workout from './assets/pages/Workout'
 import CreateWorkout from './assets/pages/CreateWorkout.jsx'
+import ResetPassword from './assets/pages/ResetPassword.jsx'
 import { checkStatus } from "./assets/services/api";
 import WorkoutPlanPage from "./assets/pages/WorkoutPlanPage";
 import WorkoutSession from "./assets/pages/WorkourSession.jsx";
@@ -21,11 +22,11 @@ function App() {
   // Hydrate from localStorage immediately
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    const { username, id } = JSON.parse(storedUser);
-    setIsAuthed(true);
-    setUsername(username || "");
-    setUserId(id || "");
+    if (storedUser) {
+      const { username, id } = JSON.parse(storedUser);
+      setIsAuthed(true);
+      setUsername(username || "");
+      setUserId(id || "");
   }
 
     setLoading(false);
@@ -88,6 +89,10 @@ function App() {
         element={
           <SignUp setIsAuthed={setIsAuthed} setUsername={setUsername} />
         }
+      />
+      <Route
+        path="/reset-password"
+        element={<ResetPassword />}
       />
       <Route
         path="/"
