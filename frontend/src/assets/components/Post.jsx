@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Clock } from "lucide-react";
-import { likePost, unlikePost } from "../services/api";
+import { Heart, MessageCircle, Trash2 } from "lucide-react"; // only icons we actually use
+import { likePost, unlikePost, getPost, commentOnPost, deleteComment } from "../services/api";
 
-const Post = ({ post, currentUserId }) => {
+const Post = ({ post, currentUserId, currentUsername }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.like_count ?? 0);
+
+  const [comments, setComments] = useState(post.comments ?? []);
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     if (Array.isArray(post.liked_by) && currentUserId) {
@@ -62,12 +66,6 @@ const Post = ({ post, currentUserId }) => {
           </h3>
           <p className="text-sm text-gray-500">@{post.username}</p>
         </div>
-        {post.created_at && (
-          <div className="flex items-center text-xs text-gray-400 gap-1">
-            <Clock className="w-3 h-3" />
-            {new Date(post.created_at).toLocaleDateString()}
-          </div>
-        )}
       </header>
 
       {/* Content */}
@@ -123,11 +121,45 @@ const Post = ({ post, currentUserId }) => {
             <span>{likeCount}</span>
           </button>
 
-          <button className="flex items-center gap-2">
+          <button onClick={toggleComments} className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-blue-500" />
-            <span>{post.comments?.length ?? 0}</span>
+            <span>{comments.length ?? post.comments?.length ?? 0}</span>
           </button>
         </div>
+
+        {showComments && (
+          <div className="mt-2 border-t border-gray-100 pt-2 space-y-2">
+            <form onSubmit={handleAddComment} className="flex gap-2">
+              <input
+                className="flex-1 border rounded px-2 py-1 text-sm"
+                placeholder="Write a comment..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+              />
+              <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                Post
+              </button>
+            </form>
+
+            <ul className="space-y-1">
+              {comments.map((c, i) => (
+                <li key={i} className="flex justify-between items-center">
+                  <span>
+                    <b>{c.username}:</b> {c.text}
+                  </span>
+                  {c.username === currentUsername && (
+                    <button
+                      onClick={() => handleDeleteComment(i)}
+                      className="text-red-500 text-xs ml-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </footer>
     </article>
   );

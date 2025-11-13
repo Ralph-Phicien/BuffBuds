@@ -1,10 +1,10 @@
 from flask import Flask
-from .routes.api import api_bp
-from .routes.auth import auth_bp
-from .routes.user import user_bp
-from .routes.posts import posts_bp
-from .routes.log import workout_logs_bp
-from .routes.workout_plans import workout_plans_bp
+from app.routes.api import api_bp
+from app.routes.auth import auth_bp
+from app.routes.user import user_bp
+from app.routes.posts import posts_bp
+from app.routes.log import workout_logs_bp
+from app.routes.workout_plans import workout_plans_bp
 import logging
 from flask_cors import CORS
 from flask_session import Session
