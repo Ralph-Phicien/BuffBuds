@@ -16,6 +16,10 @@ const Post = ({ post, currentUserId, currentUsername }) => {
     }
   }, [post.liked_by, currentUserId]);
 
+  const toggleComments = () => {
+    setShowComments((prev) => !prev);
+  };
+
   const handleLike = async () => {
     try {
       if (!liked) {
