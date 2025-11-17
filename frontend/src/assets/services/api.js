@@ -46,3 +46,5 @@ export const createWorkoutSession = (data) => API.post("/sessions", data);
 export const getWorkoutSessions = () => API.get("/sessions");
 export const updateWorkoutSession = (id, data) => API.put(`/sessions/${id}`, data);
 
+/* ANALYTICS */
+export const getVolumeHistory = () => API.get("/user/volume-history");
