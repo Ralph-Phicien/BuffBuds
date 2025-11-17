@@ -11,6 +11,7 @@ import ResetPassword from './assets/pages/ResetPassword.jsx'
 import { checkStatus } from "./assets/services/api";
 import WorkoutPlanPage from "./assets/pages/WorkoutPlanPage";
 import WorkoutSession from "./assets/pages/WorkourSession.jsx";
+import Analytics from './assets/pages/Analytics.jsx'
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -153,6 +154,20 @@ function App() {
         element={
           isAuthed ? (
             <WorkoutSession
+              username={username}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
+          ) : (
+            <Navigate to="/signin" replace />
+          )
+        }
+      />
+      <Route
+        path='analytics'
+        element={
+          isAuthed ? (
+            <Analytics 
               username={username}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}

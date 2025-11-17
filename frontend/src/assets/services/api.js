@@ -33,3 +33,18 @@ export const getUsers = () => API.get("/user/users");
 export const getUser = (username) => API.get(`/user/users/${username}`);
 export const updateUser = (username, data) => API.put(`/user/users/${username}`, data);
 export const deleteUser = (username) => API.delete(`/user/users/${username}`);
+
+/* WORKOUTS */
+export const createWorkoutPlan = (payload) => API.post("/plans", payload);
+export const getWorkoutPlans = () => API.get("/plans");
+export const getWorkoutPlan = (id) => API.get(`/plans/${id}`);
+export const updateWorkoutPlan = (id, data) => API.put(`/plans/${id}`, data);
+export const deleteWorkoutPlan = (id) => API.delete(`/plans/${id}`);
+
+/* WORKOUT SESSIONS */
+export const createWorkoutSession = (data) => API.post("/sessions", data);
+export const getWorkoutSessions = () => API.get("/sessions");
+export const updateWorkoutSession = (id, data) => API.put(`/sessions/${id}`, data);
+
+/* ANALYTICS */
+export const getVolumeHistory = () => API.get("/user/volume-history");
