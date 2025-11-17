@@ -5,7 +5,12 @@ import Feed from './assets/pages/Feed'
 import SignIn from './assets/pages/SignIn'
 import SignUp from './assets/pages/SignUp'
 import ProfilePage from './assets/pages/ProfilePage.jsx'
+import Workout from './assets/pages/Workout'
+import CreateWorkout from './assets/pages/CreateWorkout.jsx'
+import ResetPassword from './assets/pages/ResetPassword.jsx'
 import { checkStatus } from "./assets/services/api";
+import WorkoutPlanPage from "./assets/pages/WorkoutPlanPage";
+import WorkoutSession from "./assets/pages/WorkourSession.jsx";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -67,7 +72,7 @@ function App() {
         path="/profile/:username"
         element={
           isAuthed ? (
-            <ProfilePage username={username} userId={userId} setIsAuthed={setIsAuthed} setUsername={setUsername} />
+            <ProfilePage userId={userId} setIsAuthed={setIsAuthed} setUsername={setUsername} />
           ) : (
             <Navigate to="/signin" replace />
           )
@@ -92,6 +97,63 @@ function App() {
             <Feed 
               username={username}
               userId={userId}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
+          ) : (
+            <Navigate to="/signin" replace />
+          )
+        }
+      />
+      <Route
+        path="/workout"
+        element={
+          isAuthed ? (
+            <Workout
+              username={username}
+              userId={userId}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
+          ) : (
+            <Navigate to="/signin" replace />
+          )
+        }
+      />
+      <Route
+        path="/create-workout"
+        element={
+          isAuthed ? (
+            <CreateWorkout 
+              username={username}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
+          ) : (
+            <Navigate to="/signin" replace />
+          )
+        }
+      />
+      <Route
+        path="/select-workout"
+        element={
+          isAuthed ? (
+          <WorkoutPlanPage 
+            username={username}
+            setIsAuthed={setIsAuthed}
+            setUsername={setUsername}
+          />
+        ) : (
+          <Navigate to="/signin" replace />
+        )    
+        }
+      />
+      <Route
+        path="/workout-sessions"
+        element={
+          isAuthed ? (
+            <WorkoutSession
+              username={username}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}
             />

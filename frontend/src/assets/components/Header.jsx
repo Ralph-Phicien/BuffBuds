@@ -73,24 +73,81 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
 
   return (
     <header className="relative z-50 bg-[var(--bg)] text-[var(--acc)] font-[bebas] shadow-md">
-      {/* Single row on ALL sizes */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        {/* Logo */}
-        <h1 className="text-3xl sm:text-4xl whitespace-nowrap">
-          <span className="text-[var(--acc)]">BUFF</span>
-          <span className="text-[var(--hl)]">BUDS</span>
-        </h1>
+      {/* Top Bar */}
+      <div className="flex items-center justify-between px-4 py-3 gap-4">
+        {/* Left side: Logo + Search */}
+        <div className="flex items-center gap-4 flex-1">
+          {/* Logo */}
+          <h1 className="text-3xl sm:text-4xl whitespace-nowrap">
+            <span className="text-[var(--acc)]">BUFF</span>
+            <span className="text-[var(--hl)]">BUDS</span>
+          </h1>
 
-        {/* Search (flex-1; shrinks cleanly on mobile) */}
-        <div className="relative flex-1 max-w-xl" ref={searchWrapRef}>
+          {/* Search*/}
+          <div className="relative flex-1 max-w-md hidden sm:block" ref={searchWrapRef}>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setFocused(true)}
+              placeholder="Search users…"
+              className="w-full px-3 py-2 bg-white rounded-md text-gray-700 shadow-sm focus:outline-none text-sm sm:text-base"
+            />
+            {focused && (loading || suggestions.length > 0) && (
+              <ul className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto z-[60]">
+                {loading && (
+                  <li className="px-4 py-2 text-gray-500 text-sm">Searching…</li>
+                )}
+                {!loading && suggestions.length === 0 && (
+                  <li className="px-4 py-2 text-gray-500 text-sm">No matches</li>
+                )}
+                {!loading &&
+                  suggestions.map((u) => (
+                    <li
+                      key={u.id || u.username}
+                      onMouseDown={() => handleSelectUser(u.username)}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-800"
+                    >
+                      @{u.username}
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </div>
+        </div>
+
+        {/* Right side: Desktop nav */}
+        <nav className="hidden md:flex items-center gap-5 text-lg ml-auto">
+          <Link className="hover:text-[var(--hl)] transition" to="/">Feed</Link>
+          <Link className="hover:text-[var(--hl)] transition" to="/workout">Workout</Link>
+          <Link className="hover:text-[var(--hl)] transition" to="/analytics">Analytics</Link>
+          <Link className="hover:text-[var(--hl)] transition" to={`/profile/${username}`}>Profile</Link>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition"
+          >
+            Logout
+          </button>
+        </nav>
+
+        {/* Hamburger (mobile only) */}
+        <button
+          className="md:hidden text-3xl text-white"
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          ☰
+        </button>
+      </div>
+
+      {/* Search bar on mobile */}
+      <div className="sm:hidden px-4 pb-2">
+        <div className="relative" ref={searchWrapRef}>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => setFocused(true)}
             placeholder="Search users…"
-            className="w-full px-3 py-2 bg-white rounded-md text-gray-700 shadow-sm focus:outline-none text-sm sm:text-base"
+            className="w-full px-3 py-2 bg-white rounded-md text-gray-700 shadow-sm focus:outline-none text-sm"
           />
-          {/* Dropdown */}
           {focused && (loading || suggestions.length > 0) && (
             <ul className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto z-[60]">
               {loading && (
@@ -112,34 +169,20 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
             </ul>
           )}
         </div>
-
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-5 text-lg">
-          <Link className="hover:text-[var(--hl)] transition" to="/">Feed</Link>
-          <Link className="hover:text-[var(--hl)] transition" to="/workout">Workout</Link>
-          <Link className="hover:text-[var(--hl)] transition" to="/analytics">Analytics</Link>
-          <Link className="hover:text-[var(--hl)] transition" to={`/profile/${username}`}>Profile</Link>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition"
-          >
-            Logout
-          </button>
-        </nav>
-
-        {/* Mobile menu btn */}
-        <button className="md:hidden text-3xl" onClick={() => setMenuOpen(v => !v)}>☰</button>
       </div>
 
-      {/* Mobile menu (separate layer so it never clips the dropdown) */}
+      {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-black/10 bg-gray-800 text-white px-5 py-4 space-y-4">
+        <div className="md:hidden border-t border-black/10 bg-gray-500 text-white px-5 py-4 space-y-4">
           <Link to="/" onClick={() => setMenuOpen(false)} className="block hover:text-[var(--hl)]">Feed</Link>
           <Link to="/workout" onClick={() => setMenuOpen(false)} className="block hover:text-[var(--hl)]">Workout</Link>
           <Link to="/analytics" onClick={() => setMenuOpen(false)} className="block hover:text-[var(--hl)]">Analytics</Link>
           <Link to={`/profile/${username}`} onClick={() => setMenuOpen(false)} className="block hover:text-[var(--hl)]">Profile</Link>
           <button
-            onClick={handleLogout}
+            onClick={() => {
+              handleLogout();
+              setMenuOpen(false);
+            }}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition"
           >
             Logout

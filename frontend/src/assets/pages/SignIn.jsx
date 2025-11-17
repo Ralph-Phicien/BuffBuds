@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../services/api";
+import { useNavigate, Link } from "react-router-dom";
+import { login, resetPassword } from "../services/api";
 
 const SignIn = ({ setIsAuthed, setUsername }) => {
   const [email, setEmail] = useState("");
@@ -69,9 +69,9 @@ const SignIn = ({ setIsAuthed, setUsername }) => {
 
         <p className="mt-4 text-center text-white">
           Don&apos;t have an account?{" "}
-          <a href="/signup" className="text-[var(--hl)] hover:underline">
+          <Link to="/signup" className="text-[var(--hl)] hover:underline">
             Sign Up
-          </a>
+          </Link>
         </p>
       </form>
     </div>

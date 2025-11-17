@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE =
-  import.meta.env.VITE_API_BASE ||
+  import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? "http://localhost:5000" : "https://buffbuds-production.up.railway.app");
 
 export const API = axios.create({
@@ -14,6 +14,7 @@ export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
 export const logout = () => API.post("/auth/logout");
 export const checkStatus = () => API.get("/auth/status");
+export const resetPassword = (email) => API.post("/auth/reset-password-request", { email });
 
 /* POSTS */
 export const createPost = (data) => API.post("/posts", data);
@@ -21,7 +22,8 @@ export const getPosts = () => API.get("/posts");
 export const getPost = (id) => API.get(`/posts/${id}`);
 export const likePost = (id) => API.post(`/posts/${id}/like`);
 export const unlikePost = (id) => API.put(`/posts/${id}/unlike`);
-export const commentOnPost = (id, data) => API.post(`/posts/${id}/comment`, data);
+export const commentOnPost = (id, data) => API.post(`/posts/${id}/comment`, data, {headers: {"Content-Type": "application/json"}});
+export const deleteComment = (postId, commentIndex) => API.delete(`/posts/${postId}/comment/${commentIndex}`);
 export const updatePost = (id, data) => API.put(`/posts/${id}`, data);
 export const deletePost = (id) => API.delete(`/posts/${id}`);
 export const getUserPosts = (username) => API.get(`/posts/user/${username}`);

@@ -51,7 +51,7 @@ const Feed = ({ username, userId, setIsAuthed, setUsername }) => {
         ) : posts.length === 0 ? (
           <p className="text-gray-500">No posts yet. Be the first to post!</p>
         ) : (
-          posts.map((post) => <Post key={post.id} post={post} currentUser={userId} />)
+          posts.map((post) => <Post key={post.id} post={post} currentUser={userId} currentUsername={username}/>)
         )}
       </main>
     </div>
