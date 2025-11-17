@@ -9,8 +9,9 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler
 } from "chart.js";
-import { getWorkoutSessions } from "../services/api";
+import { getVolumeHistory } from "../services/api";
 
 // register chart.js components
 ChartJS.register(
@@ -20,7 +21,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 import Header from "../components/Header";
 
@@ -32,8 +34,8 @@ const Analytics = ({ username, setIsAuthed, setUsername }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getWorkoutSessions(); // should return array of sessions
-        setSessions(data);
+        const res = await getVolumeHistory(); // should return array of sessions
+        setSessions(res.data);
       } catch (err) {
         console.error("Error fetching sessions:", err);
       }
@@ -73,29 +75,37 @@ const Analytics = ({ username, setIsAuthed, setUsername }) => {
     const now = new Date();
 
     for (const s of sessions) {
-      const date = new Date(s.date || s.created_at);
-      const vol = s.tot_vol || 0;
+      const date = new Date(s.date);
+      const vol = s.volume || 0;
 
       let key;
+
       if (range === "weekly") {
         const weekStart = new Date(date);
         weekStart.setDate(date.getDate() - date.getDay());
         key = weekStart.toISOString().slice(0, 10);
-      } else if (range === "monthly") {
+      } 
+      
+      else if (range === "monthly") {
         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      } else if (range === "ytd") {
+      } 
+      
+      else if (range === "ytd") {
         if (date.getFullYear() !== now.getFullYear()) continue;
         key = `${date.getMonth() + 1}`;
-      } else {
+      } 
+      
+      else {
+        // ALL
         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       }
 
       grouped[key] = (grouped[key] || 0) + vol;
     }
 
-    // sort by date
     return Object.fromEntries(Object.entries(grouped).sort());
   };
+
 
   return (
     <div>
@@ -105,7 +115,6 @@ const Analytics = ({ username, setIsAuthed, setUsername }) => {
         setUsername={setUsername}
         />  
         <div className="flex flex-col items-center px-6 py-8 bg-gray-50 min-h-screen">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800">Analytics Dashboard</h1>
 
         {/* Toggle Buttons */}
         <div className="flex gap-3 mb-8">
@@ -125,7 +134,7 @@ const Analytics = ({ username, setIsAuthed, setUsername }) => {
         </div>
 
         {/* Chart */}
-        <div className="w-full max-w-4xl bg-white p-6 rounded-2xl shadow-md">
+        <div className="w-full bg-white p-4 sm:p-6 rounded-2xl shadow-md max-w-full">
             {chartData ? (
             <Line
                 data={chartData}
