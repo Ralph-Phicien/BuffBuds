@@ -20,6 +20,37 @@ const Post = ({ post, currentUserId, currentUsername }) => {
     setShowComments((prev) => !prev);
   };
 
+  const handleAddComment = async (e) => {
+  e.preventDefault();
+  if (!commentText.trim()) return;
+
+  try {
+    const newComment = {
+      username: currentUsername,
+      text: commentText.trim()
+    };
+
+    setComments(prev => [...prev, newComment]);
+    setCommentText("");
+
+    await commentOnPost(post.id, newComment);
+  } catch (err) {
+    console.error("Error adding comment:", err);
+  }
+};
+
+const handleDeleteComment = async (index) => {
+  try {
+    const comment = comments[index];
+
+    setComments(prev => prev.filter((_, i) => i !== index));
+
+    await deleteComment(post.id, index);
+  } catch (err) {
+    console.error("Error deleting comment:", err);
+  }
+};
+
   const handleLike = async () => {
     try {
       if (!liked) {
