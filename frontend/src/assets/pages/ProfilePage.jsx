@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Post from "../components/Post";
 import { 
@@ -13,10 +13,11 @@ import {
   followUser,
   unfollowUser
 } from "../services/api";
-import { Edit2, Camera, Save, X, TrendingUp, Dumbbell, Award, UserPlus, UserMinus, Upload } from "lucide-react";
+import { Edit2, Camera, Save, X, TrendingUp, Dumbbell, Award, UserPlus, UserMinus, Upload, PlusCircle } from "lucide-react";
 
 const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   const { username } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState({
     bio: "Loading bio...",
     profilePicture: "/logo.png",
@@ -511,6 +512,19 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
       {/* Scrollable Posts */}
       <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center">
         <div className="w-full max-w-2xl">
+          {/* Create Post Button - Only show on own profile */}
+          {isOwnProfile && (
+            <div className="mb-6">
+              <button
+                onClick={() => navigate("/workout")}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <PlusCircle className="w-6 h-6" />
+                Create New Post
+              </button>
+            </div>
+          )}
+
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
@@ -520,6 +534,14 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
             <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
               <Dumbbell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 text-lg">No posts yet.</p>
+              {isOwnProfile && (
+                <button
+                  onClick={() => navigate("/workout")}
+                  className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
+                >
+                  Create Your First Post
+                </button>
+              )}
             </div>
           ) : (
             posts.map((post) => (
