@@ -38,7 +38,32 @@ def get_user(username):
         response = supabase.table("user_profile").select("*").eq("username", username).execute()
 
         if response.data:
-            return jsonify({"user": response.data})
+            return jsonify({"user": response.data[0]})
+        
+        return jsonify({"error": "User not found"}), 404
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@user_bp.route("/users/<string:username>/prs", methods=["GET"])
+def get_user_prs(username):
+    """
+    Fetch User PRs (Personal Records)
+
+    Retrieves bench_pr, squat_pr, and deadlift_pr for a user.
+    Returns JSON response with PR data.
+    """
+
+    try:
+        response = supabase.table("user_profile").select("bench_pr, squat_pr, deadlift_pr").eq("username", username).single().execute()
+
+        if response.data:
+            return jsonify({
+                "bench_pr": response.data.get("bench_pr", 0),
+                "squat_pr": response.data.get("squat_pr", 0),
+                "deadlift_pr": response.data.get("deadlift_pr", 0)
+            }), 200
         
         return jsonify({"error": "User not found"}), 404
     
@@ -64,11 +89,26 @@ def update_user(username):
     data = request.json
 
     try:
-        response = supabase.table("user_profile").update({
-            "username": data.get("username"), # type: ignore
-            "user_bio": data.get("user_bio"), # type: ignore
-            "updated_at": "now()"
-        }).eq("id", user["id"]).execute()
+        updates = {}
+        
+        # Allow updating username, bio, profile picture, and PRs
+        if "username" in data:
+            updates["username"] = data["username"]
+        if "user_bio" in data:
+            updates["user_bio"] = data["user_bio"]
+        if "profile_picture" in data:
+            updates["profile_picture"] = data["profile_picture"]
+        if "bench_pr" in data:
+            updates["bench_pr"] = float(data["bench_pr"])
+        if "squat_pr" in data:
+            updates["squat_pr"] = float(data["squat_pr"])
+        if "deadlift_pr" in data:
+            updates["deadlift_pr"] = float(data["deadlift_pr"])
+        
+        if updates:
+            updates["updated_at"] = "now()"
+        
+        response = supabase.table("user_profile").update(updates).eq("id", user["id"]).execute()
 
         return jsonify({"updated": response.data}), 200
     
@@ -386,9 +426,6 @@ def get_volume_history():
         .single() \
         .execute()
 
-    # ----------------------------------------------------------------
-    # FIX: SingleAPIResponse DOES NOT have .error — only .data exists
-    # ----------------------------------------------------------------
     if response.data is None:
         return jsonify({"error": "No profile found"}), 404
 
@@ -403,4 +440,3 @@ def get_volume_history():
         })
 
     return jsonify(safe_history), 200
-
