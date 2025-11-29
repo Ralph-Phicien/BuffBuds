@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Post from "../components/Post";
+import CreatePostModal from "../components/CreatePostModal";
 import { 
   getUser, 
   getUserPosts, 
@@ -45,6 +46,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   const [following, setFollowing] = useState([]);
   const [showModal, setShowModal] = useState({ type: null, visible: false });
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Check if current user is viewing their own profile
   const storedUser = localStorage.getItem("user");
@@ -517,7 +519,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
           {isOwnProfile && (
             <div className="mb-6">
               <button
-                onClick={() => navigate("/workout")}
+                onClick={() => setIsModalOpen(true)}
                 className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all touch-manipulation"
               >
                 <PlusCircle className="w-6 h-6" />
@@ -537,7 +539,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
               <p className="text-gray-500 text-lg">No posts yet.</p>
               {isOwnProfile && (
                 <button
-                  onClick={() => navigate("/workout")}
+                  onClick={() => setIsModalOpen(true)}
                   className="mt-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-6 rounded-lg transition touch-manipulation"
                 >
                   Create Your First Post
@@ -594,6 +596,30 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
           </div>
         </div>
       </footer>
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onPostCreated={() => {
+          // Refresh posts when a new post is created
+          const fetchUserPosts = async () => {
+            try {
+              const res = await getUserPosts(username);
+              const raw = Array.isArray(res.data) ? res.data : [];
+              const formatted = raw.map((p) => ({
+                ...p,
+                username: p.user_profile?.username || username,
+              }));
+              formatted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+              setPosts(formatted);
+            } catch (error) {
+              console.error("Error fetching user posts:", error);
+            }
+          };
+          fetchUserPosts();
+        }}
+      />
     </div>
   );
 };

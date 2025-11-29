@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Post from "../components/Post";
-import { getPosts } from "../api";
+import CreatePostModal from "../components/CreatePostModal";
+import { getPosts } from "../services/api";
 import { PlusCircle } from "lucide-react";
 
-const Feed = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
+const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -17,8 +19,12 @@ const Feed = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const fetchedPosts = await getPosts();
-      setPosts(fetchedPosts);
+      const response = await getPosts();
+      // Handle different response structures
+      const postsData = Array.isArray(response.data) 
+        ? response.data 
+        : response.data?.data || [];
+      setPosts(postsData);
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
@@ -26,15 +32,15 @@ const Feed = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
     }
   };
 
-  const handleCreatePost = () => {
-    navigate("/workout");
+  const handlePostCreated = () => {
+    // Refresh the posts feed
+    fetchPosts();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50">
       <Header
-        isAuthed={true}
-        userId={userId}
+        username={username}
         isAdmin={isAdmin}
         setIsAuthed={setIsAuthed}
         setUsername={setUsername}
@@ -44,8 +50,8 @@ const Feed = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
         {/* Create Post Button */}
         <div className="mb-6">
           <button
-            onClick={handleCreatePost}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => setIsModalOpen(true)}
+            className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all touch-manipulation"
           >
             <PlusCircle className="w-6 h-6" />
             Create New Post
@@ -66,11 +72,11 @@ const Feed = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
               No posts yet
             </h3>
             <p className="text-gray-500 mb-4">
-              Be the first to share your workout!
+              Be the first to share something!
             </p>
             <button
-              onClick={handleCreatePost}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-6 rounded-lg transition touch-manipulation"
             >
               Create Your First Post
             </button>
@@ -82,6 +88,7 @@ const Feed = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                 key={post.id}
                 post={post}
                 currentUserId={userId}
+                currentUsername={username}
                 isAdmin={isAdmin}
                 onUpdate={fetchPosts}
               />
@@ -89,6 +96,13 @@ const Feed = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
           </div>
         )}
       </div>
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onPostCreated={handlePostCreated}
+      />
     </div>
   );
 };
