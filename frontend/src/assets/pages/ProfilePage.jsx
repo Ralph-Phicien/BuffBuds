@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import Header from "../components/Header";
 import Post from "../components/Post";
-import { getUser, getUserPosts, getUserPRs, updateUser, getWorkoutSessions } from "../services/api";
+import { getUser, getUserPosts, getUserPRs, updateUser, getWorkoutSessions,getFollowers, getFollowing } from "../services/api";
 import { Edit2, Camera, Save, X, TrendingUp, Dumbbell, Award } from "lucide-react";
 
 const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
@@ -32,10 +32,21 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   const currentUsername = storedUser ? JSON.parse(storedUser).username : null;
   const isOwnProfile = currentUsername === username;
 
+  // New state for followers/following
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [showModal, setShowModal] = useState({ type: null, visible: false });
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const res = await getUser(username);
+        if (res.data.user) {
+          setUser({
+            bio: res.data.user[0].bio || "No bio yet",
+            profilePicture: res.data.user[0].profilePicture || "/logo.png",
+          });
+        }
         const userData = {
           bio: res.data.user_bio || "No bio yet",
           profilePicture: res.data.profile_picture || "/logo.png",
@@ -65,6 +76,13 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
       }
     };
 
+    const fetchFollowersAndFollowing = async () => {
+      try {
+        const [fRes, flRes] = await Promise.all([getFollowers(username), getFollowing(username)]);
+        setFollowers(fRes.data.followers || []);
+        setFollowing(flRes.data.following || []);
+      } catch (error) {
+        console.error("Error fetching followers/following:", error);
     const fetchWorkoutStats = async () => {
       try {
         // Fetch PRs (available for all profiles)
@@ -112,6 +130,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
     if (username) {
       fetchUserData();
       fetchUserPosts();
+      fetchFollowersAndFollowing();
       fetchWorkoutStats();
     }
   }, [username, isOwnProfile]);
@@ -143,6 +162,33 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
+      <Header username={username} setIsAuthed={setIsAuthed} setUsername={setUsername} />
+
+      {/* Profile Section */}
+      <section className="max-w-3xl mx-auto p-6">
+        <div className="flex justify-evenly items-center gap-18">
+          <img
+            src={user.profilePicture}
+            alt="Profile"
+            className="w-24 h-24 rounded-2xl object-cover shadow-lg"
+          />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">@{username}</h1>
+            <p className="text-gray-600">{user.bio}</p>
+
+            {/* Followers / Following counts */}
+            <div className="flex gap-6 mt-2">
+              <div
+                className="cursor-pointer text-blue-600 hover:underline"
+                onClick={() => setShowModal({ type: "followers", visible: true })}
+              >
+                <strong>{followers.length}</strong> Followers
+              </div>
+              <div
+                className="cursor-pointer text-blue-600 hover:underline"
+                onClick={() => setShowModal({ type: "following", visible: true })}
+              >
+                <strong>{following.length}</strong> Following
       <Header
         username={username}
         isAdmin={isAdmin}
@@ -289,6 +335,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
               <p className="text-gray-500 text-lg">No posts yet.</p>
             </div>
           ) : (
+            posts.map((post) => <Post key={post.id} post={post} currentUser={userId} />)
             posts.map((post) => <Post key={post.id} post={post} currentUserId={userId} currentUsername={currentUsername} />)
           )}
         </div>
@@ -331,6 +378,41 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
           </div>
         </div>
       </footer>
+
+      {/* Followers / Following Modal */}
+      {showModal.visible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg w-80 max-h-96 overflow-y-auto p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold">
+                {showModal.type === "followers" ? "Followers" : "Following"}
+              </h2>
+              <button
+                className="text-gray-500 hover:text-gray-800"
+                onClick={() => setShowModal({ type: null, visible: false })}
+              >
+                ✕
+              </button>
+            </div>
+            <ul className="flex flex-col gap-2">
+              {(showModal.type === "followers" ? followers : following).map((user) => (
+                <li key={user}>
+                  <Link
+                    to={`/profile/${user}`}
+                    className="text-blue-600 hover:underline"
+                    onClick={() => setShowModal({ type: null, visible: false })}
+                  >
+                    {user}
+                  </Link>
+                </li>
+              ))}
+              {(showModal.type === "followers" ? followers : following).length === 0 && (
+                <li className="text-gray-500">No users found</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

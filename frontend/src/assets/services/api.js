@@ -50,6 +50,11 @@ export const updateWorkoutSession = (id, data) => API.put(`/sessions/${id}`, dat
 /* ANALYTICS */
 export const getVolumeHistory = () => API.get("/user/volume-history");
 
+/* FOLLOW SYSTEM */
+export const followUser = (username) => API.post(`/user/follow/${username}`);
+export const unfollowUser = (username) => API.post(`/user/unfollow/${username}`);
+export const getFollowers = (username) => API.get(`/user/${username}/followers`);
+export const getFollowing = (username) => API.get(`/user/${username}/following`);
 /* ADMIN */
 export const adminGetAllUsers = () => API.get("/admin/users");
 export const adminDeleteUser = (userId) => API.delete(`/admin/users/${userId}`);
