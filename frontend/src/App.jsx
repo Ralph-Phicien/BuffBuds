@@ -12,27 +12,27 @@ import { checkStatus } from "./assets/services/api";
 import WorkoutPlanPage from "./assets/pages/WorkoutPlanPage";
 import WorkoutSession from "./assets/pages/WorkourSession.jsx";
 import Analytics from './assets/pages/Analytics.jsx'
+import AdminPanel from './assets/pages/AdminPanel.jsx'
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState(false);
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
-
-  // Hydrate from localStorage immediately
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      const { username, id } = JSON.parse(storedUser);
+      const { username, id, admin } = JSON.parse(storedUser);
       setIsAuthed(true);
       setUsername(username || "");
       setUserId(id || "");
-  }
+      setIsAdmin(admin || false);
+    }
 
     setLoading(false);
 
-    // Background check with backend
     const verify = async () => {
       try {
         const res = await checkStatus();
@@ -40,17 +40,20 @@ function App() {
           setIsAuthed(true);
           setUsername(res.data.user?.username || "");
           setUserId(res.data.user?.id || "");
+          setIsAdmin(res.data.user?.admin || false);
           localStorage.setItem(
             "user",
             JSON.stringify({
               username: res.data.user?.username,
               id: res.data.user?.id,
+              admin: res.data.user?.admin || false,
             })
           );
         } else {
           setIsAuthed(false);
           setUsername("");
           setUserId("");
+          setIsAdmin(false);
           localStorage.removeItem("user");
         }
       } catch (err) {
@@ -58,6 +61,7 @@ function App() {
         setIsAuthed(false);
         setUsername("");
         setUserId("");
+        setIsAdmin(false);
         localStorage.removeItem("user");
       }
     };
@@ -73,7 +77,7 @@ function App() {
         path="/profile/:username"
         element={
           isAuthed ? (
-            <ProfilePage userId={userId} setIsAuthed={setIsAuthed} setUsername={setUsername} />
+            <ProfilePage userId={userId} isAdmin={isAdmin} setIsAuthed={setIsAuthed} setUsername={setUsername} />
           ) : (
             <Navigate to="/signin" replace />
           )
@@ -82,7 +86,7 @@ function App() {
       <Route
         path="/signin"
         element={
-          <SignIn setIsAuthed={setIsAuthed} setUsername={setUsername} />
+          <SignIn setIsAuthed={setIsAuthed} setUsername={setUsername} setIsAdmin={setIsAdmin} />
         }
       />
       <Route
@@ -92,16 +96,13 @@ function App() {
         }
       />
       <Route
-        path="/reset-password"
-        element={<ResetPassword />}
-      />
-      <Route
         path="/"
         element={
           isAuthed ? (
             <Feed 
               username={username}
               userId={userId}
+              isAdmin={isAdmin}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}
             />
@@ -117,6 +118,7 @@ function App() {
             <Workout
               username={username}
               userId={userId}
+              isAdmin={isAdmin}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}
             />
@@ -131,6 +133,7 @@ function App() {
           isAuthed ? (
             <CreateWorkout 
               username={username}
+              isAdmin={isAdmin}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}
             />
@@ -145,6 +148,7 @@ function App() {
           isAuthed ? (
           <WorkoutPlanPage 
             username={username}
+            isAdmin={isAdmin}
             setIsAuthed={setIsAuthed}
             setUsername={setUsername}
           />
@@ -159,6 +163,7 @@ function App() {
           isAuthed ? (
             <WorkoutSession
               username={username}
+              isAdmin={isAdmin}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}
             />
@@ -168,16 +173,32 @@ function App() {
         }
       />
       <Route
-        path='analytics'
+        path='/analytics'
         element={
           isAuthed ? (
             <Analytics 
               username={username}
+              isAdmin={isAdmin}
               setIsAuthed={setIsAuthed}
               setUsername={setUsername}
             />
           ) : (
             <Navigate to="/signin" replace />
+          )
+        }
+      />
+      <Route
+        path='/admin'
+        element={
+          isAuthed && isAdmin ? (
+            <AdminPanel 
+              username={username}
+              isAdmin={isAdmin}
+              setIsAuthed={setIsAuthed}
+              setUsername={setUsername}
+            />
+          ) : (
+            <Navigate to="/" replace />
           )
         }
       />

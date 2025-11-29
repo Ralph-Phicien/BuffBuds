@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Trash2 } from "lucide-react"; // only icons we actually use
-import { likePost, unlikePost, getPost, commentOnPost, deleteComment } from "../services/api";
+import { Heart, MessageCircle, Trash2 } from "lucide-react";
+import { likePost, unlikePost, commentOnPost, deleteComment } from "../services/api";
 
 const Post = ({ post, currentUserId, currentUsername }) => {
   const [liked, setLiked] = useState(false);
@@ -15,6 +15,38 @@ const Post = ({ post, currentUserId, currentUsername }) => {
       setLiked(post.liked_by.includes(currentUserId));
     }
   }, [post.liked_by, currentUserId]);
+
+  const toggleComments = () => {
+    setShowComments((prev) => !prev);
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+
+    try {
+      const newComment = {
+        username: currentUsername,
+        text: commentText.trim()
+      };
+
+      setComments(prev => [...prev, newComment]);
+      setCommentText("");
+
+      await commentOnPost(post.id, newComment);
+    } catch (err) {
+      console.error("Error adding comment:", err);
+    }
+  };
+
+  const handleDeleteComment = async (index) => {
+    try {
+      setComments(prev => prev.filter((_, i) => i !== index));
+      await deleteComment(post.id, index);
+    } catch (err) {
+      console.error("Error deleting comment:", err);
+    }
+  };
 
   const handleLike = async () => {
     try {
@@ -32,12 +64,12 @@ const Post = ({ post, currentUserId, currentUsername }) => {
     }
   };
 
-  // ✅ Detect workout summary posts
+  // Detect workout summary posts
   const isWorkoutSummary =
     post.title?.toLowerCase().includes("completed") ||
     post.content?.includes("Session Summary");
 
-  // ✅ Parse workout summary structure if detected
+  // Parse workout summary structure if detected
   let summary = null;
   if (isWorkoutSummary) {
     const lines = post.content.split("\n");
@@ -106,27 +138,30 @@ const Post = ({ post, currentUserId, currentUsername }) => {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-3">
-        <div className="flex gap-4">
-          <button
-            onClick={handleLike}
-            className="flex items-center gap-2 transition active:scale-95"
-          >
-            <Heart
-              className={`w-5 h-5 ${
-                liked ? "text-red-500 fill-red-500" : "text-red-500"
-              }`}
-            />
-            <span>{likeCount}</span>
-          </button>
+      {/* Footer with likes and comments */}
+      <footer className="border-t border-gray-100 pt-3">
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <div className="flex gap-4">
+            <button
+              onClick={handleLike}
+              className="flex items-center gap-2 transition active:scale-95"
+            >
+              <Heart
+                className={`w-5 h-5 ${
+                  liked ? "text-red-500 fill-red-500" : "text-red-500"
+                }`}
+              />
+              <span>{likeCount}</span>
+            </button>
 
-          <button onClick={toggleComments} className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-blue-500" />
-            <span>{comments.length ?? post.comments?.length ?? 0}</span>
-          </button>
+            <button onClick={toggleComments} className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-blue-500" />
+              <span>{comments.length}</span>
+            </button>
+          </div>
         </div>
 
+        {/* Comments Section */}
         {showComments && (
           <div className="mt-2 border-t border-gray-100 pt-2 space-y-2">
             <form onSubmit={handleAddComment} className="flex gap-2">

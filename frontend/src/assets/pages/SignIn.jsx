@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login, resetPassword } from "../services/api";
 
-const SignIn = ({ setIsAuthed, setUsername }) => {
+const SignIn = ({ setIsAuthed, setUsername, setIsAdmin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null); // for password reset confirmation
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -17,42 +16,33 @@ const SignIn = ({ setIsAuthed, setUsername }) => {
       const res = await login({ email, password });
 
       if (res.status === 200) {
+        console.log("Login response:", res.data); // Debug log
+        
         setIsAuthed(true);
         setUsername(res.data.user?.username || "");
+        
+        // Set admin status
+        const adminStatus = res.data.user?.admin || false;
+        if (setIsAdmin) {
+          setIsAdmin(adminStatus);
+        }
 
         localStorage.setItem(
           "user",
-          JSON.stringify({ username: res.data.user?.username })
+          JSON.stringify({ 
+            username: res.data.user?.username,
+            id: res.data.user?.id,
+            admin: adminStatus
+          })
         );
+
+        console.log("Admin status:", adminStatus); // Debug log
 
         navigate("/");
       }
     } catch (err) {
       console.error("Login error:", err);
       setError(err.response?.data?.error || "Login failed. Try again.");
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setError("Please enter your email first.");
-      setMessage(null);
-      return;
-    }
-
-    setError(null);
-    setMessage(null);
-
-    try {
-      const { error } = await resetPassword(email);
-      if (error) {
-        setError(error.message);
-      } else {
-        setMessage("Password reset email sent! Check your inbox.");
-      }
-    } catch (err) {
-      console.error("Password reset error:", err);
-      setError("Failed to send reset email. Try again.");
     }
   };
 
@@ -89,18 +79,7 @@ const SignIn = ({ setIsAuthed, setUsername }) => {
           Sign In
         </button>
 
-        <p className="mt-2 text-center">
-          <button
-            type="button"
-            onClick={handleForgotPassword}
-            className="text-blue-500 text-sm hover:underline"
-          >
-            Forgot Password?
-          </button>
-        </p>
-
         {error && <p className="text-red-500 mt-2">{error}</p>}
-        {message && <p className="text-green-500 mt-2">{message}</p>}
 
         <p className="mt-4 text-center text-white">
           Don&apos;t have an account?{" "}

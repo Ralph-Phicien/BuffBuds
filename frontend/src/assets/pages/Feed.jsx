@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Post from "../components/Post";
 import { getPosts } from "../services/api";
 
-const Feed = ({ username, userId, setIsAuthed, setUsername }) => {
+const Feed = ({ username, userId, isAdmin, setIsAuthed, setUsername }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -11,7 +11,6 @@ const Feed = ({ username, userId, setIsAuthed, setUsername }) => {
     const fetchPosts = async () => {
       try {
         const res = await getPosts();
-        // Flatten nested Supabase join (user_profile.username, etc.)
         console.log("getPosts response:", res.data);
 
         const formatted = (res.data || []).map((p) => ({
@@ -39,19 +38,26 @@ const Feed = ({ username, userId, setIsAuthed, setUsername }) => {
       {/* Header */}
       <Header
         username={username}
+        isAdmin={isAdmin}
         setIsAuthed={setIsAuthed}
         setUsername={setUsername}
       />
 
       {/* Feed content */}
       <main className="flex-1 flex flex-col items-center p-6">
-
         {loading ? (
           <p className="text-gray-500">Loading posts...</p>
         ) : posts.length === 0 ? (
           <p className="text-gray-500">No posts yet. Be the first to post!</p>
         ) : (
-          posts.map((post) => <Post key={post.id} post={post} currentUser={userId} currentUsername={username}/>)
+          posts.map((post) => (
+            <Post 
+              key={post.id} 
+              post={post} 
+              currentUserId={userId} 
+              currentUsername={username}
+            />
+          ))
         )}
       </main>
     </div>

@@ -14,7 +14,7 @@ export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
 export const logout = () => API.post("/auth/logout");
 export const checkStatus = () => API.get("/auth/status");
-export const resetPassword = (email) => API.post("/auth/reset-password-request", { email });
+export const resetPassword = (email) => API.post("/auth/reset-password", { email });
 
 /* POSTS */
 export const createPost = (data) => API.post("/posts", data);
@@ -48,3 +48,11 @@ export const updateWorkoutSession = (id, data) => API.put(`/sessions/${id}`, dat
 
 /* ANALYTICS */
 export const getVolumeHistory = () => API.get("/user/volume-history");
+
+/* ADMIN */
+export const adminGetAllUsers = () => API.get("/admin/users");
+export const adminDeleteUser = (userId) => API.delete(`/admin/users/${userId}`);
+export const adminGetAllPosts = () => API.get("/admin/posts");
+export const adminDeletePost = (postId) => API.delete(`/admin/posts/${postId}`);
+export const adminGetAllWorkoutPlans = () => API.get("/admin/workout-plans");
+export const adminDeleteWorkoutPlan = (planId) => API.delete(`/admin/workout-plans/${planId}`);
