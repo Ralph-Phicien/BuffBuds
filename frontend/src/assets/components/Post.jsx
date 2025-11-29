@@ -21,35 +21,35 @@ const Post = ({ post, currentUserId, currentUsername }) => {
   };
 
   const handleAddComment = async (e) => {
-  e.preventDefault();
-  if (!commentText.trim()) return;
+    e.preventDefault();
+    if (!commentText.trim()) return;
 
-  try {
-    const newComment = {
-      username: currentUsername,
-      text: commentText.trim()
-    };
+    try {
+      const newComment = {
+        username: currentUsername,
+        text: commentText.trim()
+      };
 
-    setComments(prev => [...prev, newComment]);
-    setCommentText("");
+      setComments(prev => [...prev, newComment]);
+      setCommentText("");
 
-    await commentOnPost(post.id, newComment);
-  } catch (err) {
-    console.error("Error adding comment:", err);
-  }
-};
+      await commentOnPost(post.id, newComment);
+    } catch (err) {
+      console.error("Error adding comment:", err);
+    }
+  };
 
-const handleDeleteComment = async (index) => {
-  try {
-    const comment = comments[index];
+  const handleDeleteComment = async (index) => {
+    try {
+      const comment = comments[index];
 
-    setComments(prev => prev.filter((_, i) => i !== index));
+      setComments(prev => prev.filter((_, i) => i !== index));
 
-    await deleteComment(post.id, index);
-  } catch (err) {
-    console.error("Error deleting comment:", err);
-  }
-};
+      await deleteComment(post.id, index);
+    } catch (err) {
+      console.error("Error deleting comment:", err);
+    }
+  };
 
   const handleLike = async () => {
     try {
@@ -123,12 +123,22 @@ const handleDeleteComment = async (index) => {
 
           {summary?.exercises?.length > 0 && (
             <div className="mb-3">
-              <p className="font-medium text-gray-800 mb-1">Exercises:</p>
-              <ul className="list-disc ml-5 space-y-1 text-gray-700 text-sm">
-                {summary.exercises.map((line, i) => (
-                  <li key={i}>{line.replace(/^•\s*/, "")}</li>
-                ))}
-              </ul>
+              <p className="font-medium text-gray-800 mb-2">Exercises:</p>
+              <div className="space-y-1.5">
+                {summary.exercises.map((line, i) => {
+                  // Remove leading bullet/dash and trim
+                  const cleanedLine = line.replace(/^[•\-\s]+/, '').trim();
+                  return (
+                    <div 
+                      key={i} 
+                      className="flex items-start gap-2 text-gray-700 text-sm pl-2"
+                    >
+                      <span className="text-gray-600 mt-0.5">•</span>
+                      <span className="flex-1">{cleanedLine}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

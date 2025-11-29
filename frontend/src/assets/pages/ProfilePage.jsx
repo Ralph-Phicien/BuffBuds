@@ -2,8 +2,18 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "../components/Header";
 import Post from "../components/Post";
-import { getUser, getUserPosts, getUserPRs, updateUser, getWorkoutSessions,getFollowers, getFollowing } from "../services/api";
-import { Edit2, Camera, Save, X, TrendingUp, Dumbbell, Award } from "lucide-react";
+import { 
+  getUser, 
+  getUserPosts, 
+  getUserPRs, 
+  updateUser, 
+  getWorkoutSessions,
+  getFollowers, 
+  getFollowing,
+  followUser,
+  unfollowUser
+} from "../services/api";
+import { Edit2, Camera, Save, X, TrendingUp, Dumbbell, Award, UserPlus, UserMinus } from "lucide-react";
 
 const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   const { username } = useParams();
@@ -27,33 +37,30 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
     deadliftPR: 0
   });
 
+  // Followers/Following
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [showModal, setShowModal] = useState({ type: null, visible: false });
+  const [isFollowing, setIsFollowing] = useState(false);
+
   // Check if current user is viewing their own profile
   const storedUser = localStorage.getItem("user");
   const currentUsername = storedUser ? JSON.parse(storedUser).username : null;
   const isOwnProfile = currentUsername === username;
-
-  // New state for followers/following
-  const [followers, setFollowers] = useState([]);
-  const [following, setFollowing] = useState([]);
-  const [showModal, setShowModal] = useState({ type: null, visible: false });
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const res = await getUser(username);
         if (res.data.user) {
-          setUser({
-            bio: res.data.user[0].bio || "No bio yet",
-            profilePicture: res.data.user[0].profilePicture || "/logo.png",
-          });
+          const userData = {
+            bio: res.data.user.user_bio || "No bio yet",
+            profilePicture: res.data.user.profile_picture || "/logo.png",
+          };
+          setUser(userData);
+          setNewBio(userData.bio);
+          setNewPictureUrl(userData.profilePicture);
         }
-        const userData = {
-          bio: res.data.user_bio || "No bio yet",
-          profilePicture: res.data.profile_picture || "/logo.png",
-        };
-        setUser(userData);
-        setNewBio(userData.bio);
-        setNewPictureUrl(userData.profilePicture);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -78,11 +85,23 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
 
     const fetchFollowersAndFollowing = async () => {
       try {
-        const [fRes, flRes] = await Promise.all([getFollowers(username), getFollowing(username)]);
+        const [fRes, flRes] = await Promise.all([
+          getFollowers(username), 
+          getFollowing(username)
+        ]);
         setFollowers(fRes.data.followers || []);
         setFollowing(flRes.data.following || []);
+        
+        // Check if current user is following this profile
+        if (currentUsername && !isOwnProfile) {
+          const currentUserFollowing = await getFollowing(currentUsername);
+          setIsFollowing(currentUserFollowing.data.following?.includes(username) || false);
+        }
       } catch (error) {
         console.error("Error fetching followers/following:", error);
+      }
+    };
+
     const fetchWorkoutStats = async () => {
       try {
         // Fetch PRs (available for all profiles)
@@ -159,38 +178,32 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
     }
   };
 
+  const handleFollow = async () => {
+    try {
+      await followUser(username);
+      setIsFollowing(true);
+      setFollowers([...followers, currentUsername]);
+    } catch (error) {
+      console.error("Error following user:", error);
+      alert("Failed to follow user");
+    }
+  };
+
+  const handleUnfollow = async () => {
+    try {
+      await unfollowUser(username);
+      setIsFollowing(false);
+      setFollowers(followers.filter(f => f !== currentUsername));
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+      alert("Failed to unfollow user");
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Header */}
-      <Header username={username} setIsAuthed={setIsAuthed} setUsername={setUsername} />
-
-      {/* Profile Section */}
-      <section className="max-w-3xl mx-auto p-6">
-        <div className="flex justify-evenly items-center gap-18">
-          <img
-            src={user.profilePicture}
-            alt="Profile"
-            className="w-24 h-24 rounded-2xl object-cover shadow-lg"
-          />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">@{username}</h1>
-            <p className="text-gray-600">{user.bio}</p>
-
-            {/* Followers / Following counts */}
-            <div className="flex gap-6 mt-2">
-              <div
-                className="cursor-pointer text-blue-600 hover:underline"
-                onClick={() => setShowModal({ type: "followers", visible: true })}
-              >
-                <strong>{followers.length}</strong> Followers
-              </div>
-              <div
-                className="cursor-pointer text-blue-600 hover:underline"
-                onClick={() => setShowModal({ type: "following", visible: true })}
-              >
-                <strong>{following.length}</strong> Following
       <Header
-        username={username}
+        username={currentUsername}
         isAdmin={isAdmin}
         setIsAuthed={setIsAuthed}
         setUsername={setUsername}
@@ -219,7 +232,33 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
 
             {/* User Info */}
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">@{username}</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">@{username}</h1>
+                
+                {/* Follow/Unfollow Button - Only show when viewing someone else's profile */}
+                {!isOwnProfile && (
+                  <button
+                    onClick={isFollowing ? handleUnfollow : handleFollow}
+                    className={`${
+                      isFollowing
+                        ? "bg-gray-500 hover:bg-gray-600"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    } text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition shadow-md sm:self-start`}
+                  >
+                    {isFollowing ? (
+                      <>
+                        <UserMinus className="w-4 h-4" />
+                        Unfollow
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        Follow
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
               
               {/* Bio Section */}
               {editingBio ? (
@@ -272,12 +311,18 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                   <p className="text-xl sm:text-2xl font-bold text-gray-800">{posts.length}</p>
                   <p className="text-xs sm:text-sm text-gray-600">Posts</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-gray-800">0</p>
+                <div 
+                  className="text-center cursor-pointer hover:opacity-75 transition"
+                  onClick={() => setShowModal({ type: "followers", visible: true })}
+                >
+                  <p className="text-xl sm:text-2xl font-bold text-gray-800">{followers.length}</p>
                   <p className="text-xs sm:text-sm text-gray-600">Followers</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-gray-800">0</p>
+                <div 
+                  className="text-center cursor-pointer hover:opacity-75 transition"
+                  onClick={() => setShowModal({ type: "following", visible: true })}
+                >
+                  <p className="text-xl sm:text-2xl font-bold text-gray-800">{following.length}</p>
                   <p className="text-xs sm:text-sm text-gray-600">Following</p>
                 </div>
               </div>
@@ -321,6 +366,43 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
         </div>
       )}
 
+      {/* Followers/Following Modal */}
+      {showModal.visible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full max-h-96 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-800">
+                {showModal.type === "followers" ? "Followers" : "Following"}
+              </h3>
+              <button
+                onClick={() => setShowModal({ type: null, visible: false })}
+                className="text-gray-500 hover:text-gray-800 transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <ul className="space-y-2">
+              {(showModal.type === "followers" ? followers : following).map((user) => (
+                <li key={user}>
+                  <Link
+                    to={`/profile/${user}`}
+                    className="block px-4 py-2 rounded-lg hover:bg-gray-100 text-blue-600 hover:text-blue-700 transition"
+                    onClick={() => setShowModal({ type: null, visible: false })}
+                  >
+                    @{user}
+                  </Link>
+                </li>
+              ))}
+              {(showModal.type === "followers" ? followers : following).length === 0 && (
+                <li className="text-center text-gray-500 py-4">
+                  No {showModal.type === "followers" ? "followers" : "following"} yet
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Scrollable Posts */}
       <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center">
         <div className="w-full max-w-2xl">
@@ -335,8 +417,14 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
               <p className="text-gray-500 text-lg">No posts yet.</p>
             </div>
           ) : (
-            posts.map((post) => <Post key={post.id} post={post} currentUser={userId} />)
-            posts.map((post) => <Post key={post.id} post={post} currentUserId={userId} currentUsername={currentUsername} />)
+            posts.map((post) => (
+              <Post 
+                key={post.id} 
+                post={post} 
+                currentUserId={userId} 
+                currentUsername={currentUsername} 
+              />
+            ))
           )}
         </div>
       </main>
@@ -344,7 +432,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
       {/* Sticky Footer with Stats */}
       <footer className="sticky bottom-0 bg-gradient-to-r from-[var(--bg)] to-gray-700 shadow-2xl">
         <div className="max-w-6xl mx-auto px-2 sm:px-4 py-3">
-          <div className="grid grid-cols-4 gap-1 sm:gap-3 text-center">
+          <div className={`grid ${isOwnProfile ? 'grid-cols-4' : 'grid-cols-3'} gap-1 sm:gap-3 text-center`}>
             {isOwnProfile && (
               <div className="bg-white bg-opacity-20 rounded-xl p-2 sm:p-3 backdrop-blur-sm">
                 <div className="flex items-center justify-center gap-1 sm:gap-2 mb-0.5 sm:mb-1">
@@ -378,41 +466,6 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
           </div>
         </div>
       </footer>
-
-      {/* Followers / Following Modal */}
-      {showModal.visible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg w-80 max-h-96 overflow-y-auto p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">
-                {showModal.type === "followers" ? "Followers" : "Following"}
-              </h2>
-              <button
-                className="text-gray-500 hover:text-gray-800"
-                onClick={() => setShowModal({ type: null, visible: false })}
-              >
-                ✕
-              </button>
-            </div>
-            <ul className="flex flex-col gap-2">
-              {(showModal.type === "followers" ? followers : following).map((user) => (
-                <li key={user}>
-                  <Link
-                    to={`/profile/${user}`}
-                    className="text-blue-600 hover:underline"
-                    onClick={() => setShowModal({ type: null, visible: false })}
-                  >
-                    {user}
-                  </Link>
-                </li>
-              ))}
-              {(showModal.type === "followers" ? followers : following).length === 0 && (
-                <li className="text-gray-500">No users found</li>
-              )}
-            </ul>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
