@@ -38,7 +38,32 @@ def get_user(username):
         response = supabase.table("user_profile").select("*").eq("username", username).execute()
 
         if response.data:
-            return jsonify({"user": response.data})
+            return jsonify({"user": response.data[0]})
+        
+        return jsonify({"error": "User not found"}), 404
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@user_bp.route("/users/<string:username>/prs", methods=["GET"])
+def get_user_prs(username):
+    """
+    Fetch User PRs (Personal Records)
+
+    Retrieves bench_pr, squat_pr, and deadlift_pr for a user.
+    Returns JSON response with PR data.
+    """
+
+    try:
+        response = supabase.table("user_profile").select("bench_pr, squat_pr, deadlift_pr").eq("username", username).single().execute()
+
+        if response.data:
+            return jsonify({
+                "bench_pr": response.data.get("bench_pr", 0),
+                "squat_pr": response.data.get("squat_pr", 0),
+                "deadlift_pr": response.data.get("deadlift_pr", 0)
+            }), 200
         
         return jsonify({"error": "User not found"}), 404
     
@@ -64,11 +89,26 @@ def update_user(username):
     data = request.json
 
     try:
-        response = supabase.table("user_profile").update({
-            "username": data.get("username"), # type: ignore
-            "user_bio": data.get("user_bio"), # type: ignore
-            "updated_at": "now()"
-        }).eq("id", user["id"]).execute()
+        updates = {}
+        
+        # Allow updating username, bio, profile picture, and PRs
+        if "username" in data:
+            updates["username"] = data["username"]
+        if "user_bio" in data:
+            updates["user_bio"] = data["user_bio"]
+        if "profile_picture" in data:
+            updates["profile_picture"] = data["profile_picture"]
+        if "bench_pr" in data:
+            updates["bench_pr"] = float(data["bench_pr"])
+        if "squat_pr" in data:
+            updates["squat_pr"] = float(data["squat_pr"])
+        if "deadlift_pr" in data:
+            updates["deadlift_pr"] = float(data["deadlift_pr"])
+        
+        if updates:
+            updates["updated_at"] = "now()"
+        
+        response = supabase.table("user_profile").update(updates).eq("id", user["id"]).execute()
 
         return jsonify({"updated": response.data}), 200
     
@@ -254,3 +294,149 @@ def get_following(username):
     following = [u["username"] for u in users_res.data]
 
     return jsonify({"following": following})
+
+# ---------------------
+# Likes Features
+# ---------------------
+
+@user_bp.route("/like/<string:username>", methods=["POST"])
+def like_user(username):
+    """
+    Like a User
+
+    Authenticated user sends a request to like another user specified by username.
+    - Checks if the user is logged in.
+    - Finds the target user to like by username.
+    - Prevents liking yourself.
+    - Checks if already liked to avoid duplicates.
+    - Inserts a new like record into the user_likes table.
+    Returns success or error messages accordingly.
+    """
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session["user"]["id"]
+
+    # get the user to be liked
+    target_res = supabase.table("user_profile").select("id").eq("username", username).single().execute()
+    if not target_res.data:
+        return jsonify({"error": "User not found"}), 404
+
+    liked_user_id = target_res.data["id"]
+
+    if liked_user_id == user_id:
+        return jsonify({"error": "Cannot like yourself"}), 400
+
+    # check if already liked
+    exists_res = supabase.table("user_likes").select("*").eq("user_id", user_id).eq("liked_user_id", liked_user_id).execute()
+
+    if exists_res.data:
+        return jsonify({"message": "Already liked"}), 200
+
+    # add to liked
+    insert_res = supabase.table("user_likes").insert({
+        "user_id": user_id,
+        "liked_user_id": liked_user_id
+    }).execute()
+
+    if insert_res.error: # type: ignore
+        return jsonify({"error": insert_res.error.message}), 500 # type: ignore
+
+    return jsonify({"message": f"You liked {username}"}), 201
+
+
+@user_bp.route("/unlike/<string:username>", methods=["POST"])
+def unlike_user(username):
+    """
+    Unlike a User
+
+    Authenticated user sends a request to unlike another user specified by username.
+    - Checks if user is logged in.
+    - Finds the target user to unlike by username.
+    - Deletes the like record from the user_likes table if it exists.
+    Returns success or error messages accordingly.
+    """
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session["user"]["id"]
+
+    # get the user to be unliked
+    target_res = supabase.table("user_profile").select("id").eq("username", username).single().execute()
+    if not target_res.data:
+        return jsonify({"error": "User not found"}), 404
+
+    liked_user_id = target_res.data["id"]
+
+    # delete the like
+    delete_res = supabase.table("user_likes").delete().eq("user_id", user_id).eq("liked_user_id", liked_user_id).execute()
+
+    if delete_res.error: # type: ignore
+        return jsonify({"error": delete_res.error.message}), 500 # type: ignore
+
+    if delete_res.count == 0:
+        return jsonify({"message": "You had not liked this user"}), 200
+
+    return jsonify({"message": f"You unliked {username}"}), 200
+
+
+@user_bp.route("/<string:username>/likes", methods=["GET"])
+def get_likes(username):
+    """
+    Get Likes List
+
+    Retrieves a list of usernames who liked the specified user.
+    - Finds the user ID by username.
+    - Queries the user_likes table for all user_ids who liked this user.
+    - Fetches the usernames of those users from user_profile table.
+    Returns the list of usernames who liked the user.
+    """
+    # get user id
+    target_res = supabase.table("user_profile").select("id").eq("username", username).single().execute()
+    if not target_res.data:
+        return jsonify({"error": "User not found"}), 404
+
+    liked_user_id = target_res.data["id"]
+
+    # find all users who liked this user
+    likes_res = supabase.table("user_likes").select("user_id").eq("liked_user_id", liked_user_id).execute()
+
+    liker_ids = [like["user_id"] for like in likes_res.data]
+
+    if not liker_ids:
+        return jsonify({"likes": []})
+
+    # get usernames of those who liked
+    users_res = supabase.table("user_profile").select("username").in_("id", liker_ids).execute()
+
+    likers = [u["username"] for u in users_res.data]
+
+    return jsonify({"likes": likers})
+
+@user_bp.route("/volume-history", methods=["GET"])
+def get_volume_history():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session["user"]["id"]
+
+    response = supabase.table("user_profile") \
+        .select("volume_history") \
+        .eq("id", user_id) \
+        .single() \
+        .execute()
+
+    if response.data is None:
+        return jsonify({"error": "No profile found"}), 404
+
+    volume_history = response.data.get("volume_history", [])
+
+    # Ensure JSON serializable datetime
+    safe_history = []
+    for item in volume_history:
+        safe_history.append({
+            "date": str(item["date"]),
+            "volume": item["volume"]
+        })
+
+    return jsonify(safe_history), 200

@@ -31,6 +31,7 @@ export const getUserPosts = (username) => API.get(`/posts/user/${username}`);
 /* USERS */
 export const getUsers = () => API.get("/user/users");
 export const getUser = (username) => API.get(`/user/users/${username}`);
+export const getUserPRs = (username) => API.get(`/user/users/${username}/prs`);
 export const updateUser = (username, data) => API.put(`/user/users/${username}`, data);
 export const deleteUser = (username) => API.delete(`/user/users/${username}`);
 
@@ -54,3 +55,10 @@ export const followUser = (username) => API.post(`/user/follow/${username}`);
 export const unfollowUser = (username) => API.post(`/user/unfollow/${username}`);
 export const getFollowers = (username) => API.get(`/user/${username}/followers`);
 export const getFollowing = (username) => API.get(`/user/${username}/following`);
+/* ADMIN */
+export const adminGetAllUsers = () => API.get("/admin/users");
+export const adminDeleteUser = (userId) => API.delete(`/admin/users/${userId}`);
+export const adminGetAllPosts = () => API.get("/admin/posts");
+export const adminDeletePost = (postId) => API.delete(`/admin/posts/${postId}`);
+export const adminGetAllWorkoutPlans = () => API.get("/admin/workout-plans");
+export const adminDeleteWorkoutPlan = (planId) => API.delete(`/admin/workout-plans/${planId}`);
