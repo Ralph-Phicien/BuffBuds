@@ -269,7 +269,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
         <div className="max-w-5xl mx-auto p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
             {/* Profile Picture */}
-            <div className="relative group">
+            <div className="relative">
               <img
                 src={user.profilePicture}
                 alt="Profile"
@@ -278,9 +278,10 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
               {isOwnProfile && (
                 <button
                   onClick={() => setEditingPicture(true)}
-                  className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg shadow-lg transition opacity-0 group-hover:opacity-100"
+                  className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white p-2.5 rounded-lg shadow-lg transition touch-manipulation"
+                  aria-label="Edit profile picture"
                 >
-                  <Camera className="w-4 h-4" />
+                  <Camera className="w-5 h-5" />
                 </button>
               )}
             </div>
@@ -296,9 +297,9 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                     onClick={isFollowing ? handleUnfollow : handleFollow}
                     className={`${
                       isFollowing
-                        ? "bg-gray-500 hover:bg-gray-600"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    } text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition shadow-md sm:self-start`}
+                        ? "bg-gray-500 hover:bg-gray-600 active:bg-gray-700"
+                        : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
+                    } text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition shadow-md sm:self-start touch-manipulation`}
                   >
                     {isFollowing ? (
                       <>
@@ -328,7 +329,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={handleUpdateBio}
-                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-2 transition text-sm"
+                      className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-2 transition text-sm touch-manipulation"
                     >
                       <Save className="w-4 h-4" />
                       Save
@@ -338,7 +339,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                         setEditingBio(false);
                         setNewBio(user.bio);
                       }}
-                      className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-2 transition text-sm"
+                      className="bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white px-3 py-1.5 rounded-lg font-semibold flex items-center gap-2 transition text-sm touch-manipulation"
                     >
                       <X className="w-4 h-4" />
                       Cancel
@@ -346,12 +347,12 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                   </div>
                 </div>
               ) : (
-                <div className="relative group/bio">
+                <div className="relative">
                   <p className="text-gray-600 mb-2 text-sm">{user.bio}</p>
                   {isOwnProfile && (
                     <button
                       onClick={() => setEditingBio(true)}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-semibold flex items-center gap-1 opacity-0 group-hover/bio:opacity-100 transition"
+                      className="text-blue-600 hover:text-blue-700 active:text-blue-800 text-sm font-semibold flex items-center gap-1 transition touch-manipulation"
                     >
                       <Edit2 className="w-4 h-4" />
                       Edit Bio
@@ -367,14 +368,14 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                   <p className="text-xs sm:text-sm text-gray-600">Posts</p>
                 </div>
                 <div 
-                  className="text-center cursor-pointer hover:opacity-75 transition"
+                  className="text-center cursor-pointer hover:opacity-75 active:opacity-50 transition touch-manipulation"
                   onClick={() => setShowModal({ type: "followers", visible: true })}
                 >
                   <p className="text-xl sm:text-2xl font-bold text-gray-800">{followers.length}</p>
                   <p className="text-xs sm:text-sm text-gray-600">Followers</p>
                 </div>
                 <div 
-                  className="text-center cursor-pointer hover:opacity-75 transition"
+                  className="text-center cursor-pointer hover:opacity-75 active:opacity-50 transition touch-manipulation"
                   onClick={() => setShowModal({ type: "following", visible: true })}
                 >
                   <p className="text-xl sm:text-2xl font-bold text-gray-800">{following.length}</p>
@@ -401,7 +402,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <div className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-center font-semibold transition flex items-center justify-center gap-2">
+                <div className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-lg text-center font-semibold transition flex items-center justify-center gap-2 touch-manipulation">
                   <Upload className="w-5 h-5" />
                   Choose Image File
                 </div>
@@ -455,14 +456,14 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
             <div className="flex gap-2">
               <button
                 onClick={handleUpdatePicture}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
+                className="flex-1 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition touch-manipulation"
               >
                 <Save className="w-4 h-4" />
                 Save
               </button>
               <button
                 onClick={handleCancelPictureEdit}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
+                className="flex-1 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition touch-manipulation"
               >
                 <X className="w-4 h-4" />
                 Cancel
@@ -482,7 +483,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
               </h3>
               <button
                 onClick={() => setShowModal({ type: null, visible: false })}
-                className="text-gray-500 hover:text-gray-800 transition"
+                className="text-gray-500 hover:text-gray-800 active:text-gray-900 transition touch-manipulation"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -492,7 +493,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                 <li key={user}>
                   <Link
                     to={`/profile/${user}`}
-                    className="block px-4 py-2 rounded-lg hover:bg-gray-100 text-blue-600 hover:text-blue-700 transition"
+                    className="block px-4 py-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 text-blue-600 hover:text-blue-700 transition touch-manipulation"
                     onClick={() => setShowModal({ type: null, visible: false })}
                   >
                     @{user}
@@ -517,7 +518,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
             <div className="mb-6">
               <button
                 onClick={() => navigate("/workout")}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all touch-manipulation"
               >
                 <PlusCircle className="w-6 h-6" />
                 Create New Post
@@ -537,7 +538,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
               {isOwnProfile && (
                 <button
                   onClick={() => navigate("/workout")}
-                  className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
+                  className="mt-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-6 rounded-lg transition touch-manipulation"
                 >
                   Create Your First Post
                 </button>
