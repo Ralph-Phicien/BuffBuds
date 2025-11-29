@@ -13,7 +13,7 @@ import {
   followUser,
   unfollowUser
 } from "../services/api";
-import { Edit2, Camera, Save, X, TrendingUp, Dumbbell, Award, UserPlus, UserMinus } from "lucide-react";
+import { Edit2, Camera, Save, X, TrendingUp, Dumbbell, Award, UserPlus, UserMinus, Upload } from "lucide-react";
 
 const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   const { username } = useParams();
@@ -27,6 +27,8 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
   const [newBio, setNewBio] = useState("");
   const [editingPicture, setEditingPicture] = useState(false);
   const [newPictureUrl, setNewPictureUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   
   // Stats
   const [stats, setStats] = useState({
@@ -168,13 +170,65 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
 
   const handleUpdatePicture = async () => {
     try {
-      await updateUser(username, { profile_picture: newPictureUrl });
-      setUser({ ...user, profilePicture: newPictureUrl });
-      setEditingPicture(false);
-      alert("Profile picture updated successfully!");
+      // If user selected a file, convert to base64
+      if (selectedFile) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64String = reader.result;
+          await updateUser(username, { profile_picture: base64String });
+          setUser({ ...user, profilePicture: base64String });
+          setEditingPicture(false);
+          setSelectedFile(null);
+          setPreviewUrl(null);
+          alert("Profile picture updated successfully!");
+        };
+        reader.readAsDataURL(selectedFile);
+      } else if (newPictureUrl.trim()) {
+        // If user entered a URL
+        await updateUser(username, { profile_picture: newPictureUrl });
+        setUser({ ...user, profilePicture: newPictureUrl });
+        setEditingPicture(false);
+        alert("Profile picture updated successfully!");
+      } else {
+        alert("Please select a file or enter an image URL");
+      }
     } catch (error) {
       console.error("Error updating profile picture:", error);
       alert("Failed to update profile picture");
+    }
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+      setNewPictureUrl(''); // Clear URL input if file is selected
+    }
+  };
+
+  const handleCancelPictureEdit = () => {
+    setEditingPicture(false);
+    setNewPictureUrl(user.profilePicture);
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
     }
   };
 
@@ -331,18 +385,72 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
         </div>
       </section>
 
-      {/* Picture URL Modal */}
+      {/* Picture Upload Modal */}
       {editingPicture && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
             <h3 className="text-xl font-bold mb-4 text-gray-800">Update Profile Picture</h3>
+            
+            {/* File upload button */}
+            <div className="mb-4">
+              <label className="w-full cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <div className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-center font-semibold transition flex items-center justify-center gap-2">
+                  <Upload className="w-5 h-5" />
+                  Choose Image File
+                </div>
+              </label>
+              
+              {/* Show selected file name */}
+              {selectedFile && (
+                <p className="text-sm text-gray-600 mt-2 text-center">
+                  Selected: {selectedFile.name}
+                </p>
+              )}
+            </div>
+
+            {/* Preview of selected image */}
+            {previewUrl && (
+              <div className="flex justify-center mb-4">
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-32 h-32 rounded-full object-cover border-4 border-blue-500"
+                />
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex-1 border-t border-gray-300"></div>
+              <span className="text-sm text-gray-500 font-semibold">OR</span>
+              <div className="flex-1 border-t border-gray-300"></div>
+            </div>
+
+            {/* URL input */}
             <input
               type="text"
               value={newPictureUrl}
-              onChange={(e) => setNewPictureUrl(e.target.value)}
-              placeholder="Enter image URL..."
-              className="w-full px-4 py-2 border-2 border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none mb-4"
+              onChange={(e) => {
+                setNewPictureUrl(e.target.value);
+                // Clear file selection if typing URL
+                if (e.target.value && selectedFile) {
+                  setSelectedFile(null);
+                  if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl(null);
+                  }
+                }
+              }}
+              placeholder="Or paste image URL..."
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 focus:outline-none mb-4"
             />
+
             <div className="flex gap-2">
               <button
                 onClick={handleUpdatePicture}
@@ -352,10 +460,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
                 Save
               </button>
               <button
-                onClick={() => {
-                  setEditingPicture(false);
-                  setNewPictureUrl(user.profilePicture);
-                }}
+                onClick={handleCancelPictureEdit}
                 className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
               >
                 <X className="w-4 h-4" />
