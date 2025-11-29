@@ -14,7 +14,7 @@ export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
 export const logout = () => API.post("/auth/logout");
 export const checkStatus = () => API.get("/auth/status");
-export const resetPassword = (email) => API.post("/auth/reset-password", { email });
+export const resetPassword = (email) => API.post("/auth/reset-password-request", { email });
 
 /* POSTS */
 export const createPost = (data) => API.post("/posts", data);
@@ -31,6 +31,7 @@ export const getUserPosts = (username) => API.get(`/posts/user/${username}`);
 /* USERS */
 export const getUsers = () => API.get("/user/users");
 export const getUser = (username) => API.get(`/user/users/${username}`);
+export const getUserPRs = (username) => API.get(`/user/users/${username}/prs`);
 export const updateUser = (username, data) => API.put(`/user/users/${username}`, data);
 export const deleteUser = (username) => API.delete(`/user/users/${username}`);
 

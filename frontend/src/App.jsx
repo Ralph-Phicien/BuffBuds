@@ -10,7 +10,7 @@ import CreateWorkout from './assets/pages/CreateWorkout.jsx'
 import ResetPassword from './assets/pages/ResetPassword.jsx'
 import { checkStatus } from "./assets/services/api";
 import WorkoutPlanPage from "./assets/pages/WorkoutPlanPage";
-import WorkoutSession from "./assets/pages/WorkourSession.jsx";
+import WorkoutSession from "./assets/pages/WorkoutSession.jsx";
 import Analytics from './assets/pages/Analytics.jsx'
 import AdminPanel from './assets/pages/AdminPanel.jsx'
 
