@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login, resetPassword } from "../services/api";
 
-const SignIn = ({ setIsAuthed, setUsername }) => {
+const SignIn = ({ setIsAuthed, setUsername, setIsAdmin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -16,13 +16,27 @@ const SignIn = ({ setIsAuthed, setUsername }) => {
       const res = await login({ email, password });
 
       if (res.status === 200) {
+        console.log("Login response:", res.data); // Debug log
+        
         setIsAuthed(true);
         setUsername(res.data.user?.username || "");
+        
+        // Set admin status
+        const adminStatus = res.data.user?.admin || false;
+        if (setIsAdmin) {
+          setIsAdmin(adminStatus);
+        }
 
         localStorage.setItem(
           "user",
-          JSON.stringify({ username: res.data.user?.username })
+          JSON.stringify({ 
+            username: res.data.user?.username,
+            id: res.data.user?.id,
+            admin: adminStatus
+          })
         );
+
+        console.log("Admin status:", adminStatus); // Debug log
 
         navigate("/");
       }

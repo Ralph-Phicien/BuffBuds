@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logout, getUsers } from "../services/api";
 
-const Header = ({ username, setIsAuthed, setUsername }) => {
+const Header = ({ username, isAdmin, setIsAuthed, setUsername }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -10,6 +10,11 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
   const [focused, setFocused] = useState(false);
   const navigate = useNavigate();
   const searchWrapRef = useRef(null);
+
+  // Debug log
+  useEffect(() => {
+    console.log("Header - isAdmin:", isAdmin);
+  }, [isAdmin]);
 
   const handleLogout = async () => {
     try { await logout(); } catch (e) { console.error(e); }
@@ -21,7 +26,6 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
     }
   };
 
-  // Click outside: close suggestions
   useEffect(() => {
     const onDocClick = (e) => {
       if (!searchWrapRef.current) return;
@@ -31,7 +35,6 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  // Live search (debounced)
   useEffect(() => {
     const q = search.trim();
     if (q.length < 2) { setSuggestions([]); return; }
@@ -40,7 +43,6 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
       setLoading(true);
       try {
         const res = await getUsers();
-        // Be defensive about the payload shape
         const arr = Array.isArray(res.data)
           ? res.data
           : Array.isArray(res.data?.users)
@@ -73,17 +75,13 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
 
   return (
     <header className="relative z-50 bg-[var(--bg)] text-[var(--acc)] font-[bebas] shadow-md">
-      {/* Top Bar */}
       <div className="flex items-center justify-between px-4 py-3 gap-4">
-        {/* Left side: Logo + Search */}
         <div className="flex items-center gap-4 flex-1">
-          {/* Logo */}
           <h1 className="text-3xl sm:text-4xl whitespace-nowrap">
             <span className="text-[var(--acc)]">BUFF</span>
             <span className="text-[var(--hl)]">BUDS</span>
           </h1>
 
-          {/* Search*/}
           <div className="relative flex-1 max-w-md hidden sm:block" ref={searchWrapRef}>
             <input
               value={search}
@@ -115,12 +113,15 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
           </div>
         </div>
 
-        {/* Right side: Desktop nav */}
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-5 text-lg ml-auto">
           <Link className="hover:text-[var(--hl)] transition" to="/">Feed</Link>
           <Link className="hover:text-[var(--hl)] transition" to="/workout">Workout</Link>
           <Link className="hover:text-[var(--hl)] transition" to="/analytics">Analytics</Link>
           <Link className="hover:text-[var(--hl)] transition" to={`/profile/${username}`}>Profile</Link>
+          {isAdmin && (
+            <Link className="hover:text-[var(--hl)] transition text-yellow-400" to="/admin">Admin</Link>
+          )}
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition"
@@ -129,7 +130,6 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
           </button>
         </nav>
 
-        {/* Hamburger (mobile only) */}
         <button
           className="md:hidden text-3xl text-white"
           onClick={() => setMenuOpen((v) => !v)}
@@ -138,7 +138,7 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
         </button>
       </div>
 
-      {/* Search bar on mobile */}
+      {/* Mobile search */}
       <div className="sm:hidden px-4 pb-2">
         <div className="relative" ref={searchWrapRef}>
           <input
@@ -178,6 +178,9 @@ const Header = ({ username, setIsAuthed, setUsername }) => {
           <Link to="/workout" onClick={() => setMenuOpen(false)} className="block hover:text-[var(--hl)]">Workout</Link>
           <Link to="/analytics" onClick={() => setMenuOpen(false)} className="block hover:text-[var(--hl)]">Analytics</Link>
           <Link to={`/profile/${username}`} onClick={() => setMenuOpen(false)} className="block hover:text-[var(--hl)]">Profile</Link>
+          {isAdmin && (
+            <Link to="/admin" onClick={() => setMenuOpen(false)} className="block text-yellow-400 hover:text-[var(--hl)]">Admin</Link>
+          )}
           <button
             onClick={() => {
               handleLogout();
