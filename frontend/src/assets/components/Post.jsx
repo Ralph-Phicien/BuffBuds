@@ -67,26 +67,62 @@ const Post = ({ post, currentUserId, currentUsername }) => {
     }
   };
 
+  // Get username from post object - check multiple possible locations
+  const postUsername = post.username || post.user_profile?.username || "Unknown";
+
   // Detect workout summary posts
   const isWorkoutSummary =
     post.title?.toLowerCase().includes("completed") ||
-    post.content?.includes("Session Summary");
+    post.content?.includes("🏋️ Workout Summary");
 
   // Parse workout summary structure if detected
   let summary = null;
   if (isWorkoutSummary) {
-    const lines = post.content.split("\n");
+    const lines = post.content.split("\n").map(line => line.trim()).filter(line => line);
+    
+    // Find key sections
     const volumeLine = lines.find((l) => l.toLowerCase().includes("total volume"));
+    const exercisesStartIndex = lines.findIndex((l) => l.toLowerCase().includes("exercises:"));
     const notesIndex = lines.findIndex((l) => l.toLowerCase().includes("notes:"));
-    const exercisesStart = lines.findIndex((l) => l.toLowerCase().includes("exercises:"));
-
+    
     const totalVolume = volumeLine?.split(":")[1]?.trim();
-    const notes =
-      notesIndex !== -1 ? lines.slice(notesIndex + 1).join("\n").trim() : null;
-    const exercises =
-      exercisesStart !== -1 && notesIndex !== -1
-        ? lines.slice(exercisesStart + 1, notesIndex).filter((l) => l.trim() !== "")
-        : [];
+    
+    // Extract exercises (between "Exercises:" and "Notes:")
+    let exercises = [];
+    if (exercisesStartIndex !== -1) {
+      const exercisesEndIndex = notesIndex !== -1 ? notesIndex : lines.length;
+      const exerciseLines = lines.slice(exercisesStartIndex + 1, exercisesEndIndex);
+      
+      let currentExercise = null;
+      
+      exerciseLines.forEach((line) => {
+        // Check if this is an exercise name (doesn't start with "Set" or "-")
+        if (!line.toLowerCase().startsWith('set') && !line.startsWith('-')) {
+          // This is a new exercise name
+          if (currentExercise) {
+            exercises.push(currentExercise);
+          }
+          currentExercise = {
+            name: line,
+            sets: []
+          };
+        } else if (currentExercise && (line.toLowerCase().startsWith('set') || line.startsWith('-'))) {
+          // This is a set detail for the current exercise
+          const cleanedLine = line.replace(/^[-•\s]+/, '').trim();
+          currentExercise.sets.push(cleanedLine);
+        }
+      });
+      
+      // Don't forget the last exercise
+      if (currentExercise) {
+        exercises.push(currentExercise);
+      }
+    }
+    
+    // Extract notes
+    const notes = notesIndex !== -1 
+      ? lines.slice(notesIndex + 1).join("\n").trim() 
+      : null;
 
     summary = { totalVolume, notes, exercises };
   }
@@ -99,7 +135,7 @@ const Post = ({ post, currentUserId, currentUsername }) => {
           <h3 className="text-lg font-semibold text-gray-800">
             {post.title || "Untitled Post"}
           </h3>
-          <p className="text-sm text-gray-500">@{post.username}</p>
+          <p className="text-sm text-gray-500">@{postUsername}</p>
         </div>
       </header>
 
@@ -110,7 +146,7 @@ const Post = ({ post, currentUserId, currentUsername }) => {
         </div>
       ) : (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-semibold text-green-600">
               🏋️ Workout Summary
             </span>
@@ -123,28 +159,32 @@ const Post = ({ post, currentUserId, currentUsername }) => {
 
           {summary?.exercises?.length > 0 && (
             <div className="mb-3">
-              <p className="font-medium text-gray-800 mb-2">Exercises:</p>
-              <div className="space-y-1.5">
-                {summary.exercises.map((line, i) => {
-                  // Remove leading bullet/dash and trim
-                  const cleanedLine = line.replace(/^[•\-\s]+/, '').trim();
-                  return (
-                    <div 
-                      key={i} 
-                      className="flex items-start gap-2 text-gray-700 text-sm pl-2"
-                    >
-                      <span className="text-gray-600 mt-0.5">•</span>
-                      <span className="flex-1">{cleanedLine}</span>
-                    </div>
-                  );
-                })}
+              <p className="font-medium text-gray-800 mb-3">Exercises:</p>
+              <div className="space-y-3">
+                {summary.exercises.map((exercise, i) => (
+                  <div key={i} className="bg-white rounded-lg p-3 border border-gray-200">
+                    {/* Exercise name without bullet */}
+                    <p className="font-semibold text-gray-900 mb-2">{exercise.name}</p>
+                    {/* Sets with bullets */}
+                    {exercise.sets.length > 0 && (
+                      <div className="space-y-1 ml-3">
+                        {exercise.sets.map((set, j) => (
+                          <div key={j} className="flex items-start gap-2 text-gray-700 text-sm">
+                            <span className="text-gray-400 mt-0.5">•</span>
+                            <span className="flex-1">{set}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {summary?.notes && (
-            <div className="text-gray-700 text-sm whitespace-pre-wrap">
-              <p className="font-medium text-gray-800">Notes:</p>
+            <div className="text-gray-700 text-sm whitespace-pre-wrap bg-white rounded-lg p-3 border border-gray-200">
+              <p className="font-medium text-gray-800 mb-1">Notes:</p>
               <p>{summary.notes}</p>
             </div>
           )}

@@ -514,7 +514,7 @@ const ProfilePage = ({ userId, isAdmin, setIsAuthed, setUsername }) => {
 
       {/* Scrollable Posts */}
       <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col items-center">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-xl">
           {/* Create Post Button - Only show on own profile */}
           {isOwnProfile && (
             <div className="mb-6">

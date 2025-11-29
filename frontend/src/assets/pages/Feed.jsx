@@ -7,15 +7,12 @@ import { getPosts } from "../services/api";
 import { PlusCircle } from "lucide-react";
 
 const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
-  console.log("Feed component rendered with props:", { userId, username, isAdmin });
-  
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    console.log("Feed useEffect running - fetching posts");
     fetchPosts();
   }, []);
 
@@ -23,12 +20,19 @@ const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
     try {
       setLoading(true);
       const response = await getPosts();
-      console.log("Posts fetched:", response.data);
       // Handle different response structures
       const postsData = Array.isArray(response.data) 
         ? response.data 
         : response.data?.data || [];
-      setPosts(postsData);
+      
+      // Sort posts by created_at date - most recent first
+      const sortedPosts = postsData.sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return dateB - dateA; // Descending order (newest first)
+      });
+      
+      setPosts(sortedPosts);
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
@@ -37,12 +41,9 @@ const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
   };
 
   const handlePostCreated = () => {
-    console.log("Post created - refreshing feed");
     // Refresh the posts feed
     fetchPosts();
   };
-
-  console.log("Rendering Feed - isModalOpen:", isModalOpen, "posts count:", posts.length);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50">
@@ -55,12 +56,9 @@ const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
 
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Create Post Button */}
-        <div className="mb-6">
+        <div className="mb-6 w-full max-w-xl mx-auto">
           <button
-            onClick={() => {
-              console.log("Create Post button clicked!");
-              setIsModalOpen(true);
-            }}
+            onClick={() => setIsModalOpen(true)}
             className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all touch-manipulation"
           >
             <PlusCircle className="w-6 h-6" />
@@ -74,7 +72,7 @@ const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : posts.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-8 text-center">
+          <div className="bg-white rounded-xl shadow-md p-8 text-center w-full max-w-xl mx-auto">
             <div className="text-gray-400 mb-4">
               <PlusCircle className="w-16 h-16 mx-auto" />
             </div>
@@ -85,17 +83,14 @@ const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
               Be the first to share something!
             </p>
             <button
-              onClick={() => {
-                console.log("Empty state button clicked!");
-                setIsModalOpen(true);
-              }}
+              onClick={() => setIsModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-6 rounded-lg transition touch-manipulation"
             >
               Create Your First Post
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 w-full max-w-xl mx-auto">
             {posts.map((post) => (
               <Post
                 key={post.id}
@@ -113,10 +108,7 @@ const Feed = ({ userId, username, isAdmin, setIsAuthed, setUsername }) => {
       {/* Create Post Modal */}
       <CreatePostModal
         isOpen={isModalOpen}
-        onClose={() => {
-          console.log("Modal closing");
-          setIsModalOpen(false);
-        }}
+        onClose={() => setIsModalOpen(false)}
         onPostCreated={handlePostCreated}
       />
     </div>
